@@ -3,178 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Finance OS | Shared Ledger</title>
+    <title>Household Finance Tracker</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #0f172a; --secondary: #2563eb; --accent: #38bdf8; --bg: #f8fafc; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; --card: #ffffff; --text: #334155; --muted: #64748b; --border: #e2e8f0; }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        /* Modern, Friendly, Soft UI Palette */
+        :root { 
+            --primary: #6366f1; /* Soft Indigo */
+            --primary-light: #e0e7ff;
+            --secondary: #10b981; /* Emerald Green */
+            --bg: #f3f4f6; /* Very light gray */
+            --danger: #f43f5e; /* Rose Red */
+            --warning: #f59e0b; /* Amber */
+            --card: #ffffff; 
+            --text: #1f2937; 
+            --muted: #6b7280; 
+            --border: #e5e7eb; 
+            --radius: 16px;
+        }
+        * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
         .view-section { display: none; width: 100%; height: 100%; overflow-y: auto; }
-        .view-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Landing UI */
-        .landing-container { max-width: 500px; margin: 80px auto; background: var(--card); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
-        .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.2em; letter-spacing: -1px; }
+        .landing-container { max-width: 450px; margin: 10vh auto; background: var(--card); padding: 40px; border-radius: var(--radius); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); text-align: center; }
+        .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.2em; font-weight: 800; }
         .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 30px; }
 
         /* App Layout */
-        #sidebar { background: var(--primary); color: white; width: 260px; display: flex; flex-direction: column; padding: 20px 0; z-index: 100; }
-        .nav-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; opacity: 0.6; transition: 0.2s; font-weight: 500; font-size: 0.95em; border-left: 4px solid transparent; }
-        .nav-item:hover, .nav-item.active { opacity: 1; background: rgba(255,255,255,0.08); border-left: 4px solid var(--accent); }
+        #sidebar { background: white; width: 260px; display: flex; flex-direction: column; padding: 20px 0; z-index: 100; border-right: 1px solid var(--border); }
+        .nav-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--muted); transition: 0.2s; font-weight: 600; font-size: 0.95em; border-right: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { color: var(--primary); background: var(--primary-light); border-right: 4px solid var(--primary); }
         #main-content { flex-grow: 1; overflow-y: auto; padding: 25px; position: relative; padding-bottom: 90px; scroll-behavior: smooth; }
         
         /* UI Elements */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-        .card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 25px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .card { background: var(--card); padding: 25px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
         
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 0.75em; font-weight: 700; margin-bottom: 6px; color: var(--muted); text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; background: #f8fafc; margin-bottom: 5px; }
-        button { background: var(--secondary); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px; transition: 0.2s; }
-        button:hover { filter: brightness(1.1); }
-        button.outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
-        button.danger { background: var(--danger); }
-        button.icon-btn { padding: 6px; width: auto; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); }
-        button.icon-btn:hover { background: var(--bg); color: var(--primary); }
+        .form-group { margin-bottom: 18px; text-align: left; }
+        label { display: block; font-size: 0.85em; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        input, select { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: #f9fafb; transition: 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: white; }
         
-        .member-badge { background: #e0e7ff; color: var(--secondary); padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: bold; display: inline-block; margin: 5px; }
-        .stat-card { background: #f8fafc; border: 1px solid var(--border); padding: 18px; border-radius: 10px; text-align: center; }
-        .master-balance { background: linear-gradient(135deg, var(--primary), #1e293b); color: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); }
+        button { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
+        button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(99, 102, 241, 0.4); }
+        button.outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none; }
+        button.outline:hover { border-color: var(--primary); color: var(--primary); }
+        button.success { background: var(--secondary); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
+        button.success:hover { box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.4); }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.9em; min-width: 700px; }
-        th, td { padding: 15px 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.75em; }
-        .row-settlement { background-color: rgba(16, 185, 129, 0.05); }
+        .badge { background: var(--primary-light); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; display: inline-block; margin: 5px; }
+        .stat-card { background: white; border: 1px solid var(--border); padding: 20px; border-radius: var(--radius); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .master-balance { background: linear-gradient(135deg, var(--primary), #818cf8); color: white; padding: 35px; border-radius: var(--radius); text-align: center; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 700px; }
+        th, td { padding: 16px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { color: var(--muted); font-weight: 600; font-size: 0.85em; }
+        .action-icon { cursor: pointer; font-size: 1.2em; margin-right: 10px; opacity: 0.6; transition: 0.2s; background: none; border: none; }
+        .action-icon:hover { opacity: 1; transform: scale(1.1); }
 
-        /* Mobile Adjustments */
+        /* Mobile Nav */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            #sidebar { flex-direction: row; width: 100%; position: fixed; bottom: 0; left: 0; padding: 0; height: 75px; background: white; border-top: 1px solid var(--border); z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
-            .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; color: var(--muted); font-size: 0.65em; gap: 4px; border-left: none; }
-            .nav-item:hover, .nav-item.active { background: none; color: var(--secondary); border-top: 3px solid var(--secondary); }
+            #sidebar { flex-direction: row; width: 100%; position: fixed; bottom: 0; left: 0; padding: 0; height: 75px; border-right: none; border-top: 1px solid var(--border); z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+            .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; font-size: 0.7em; gap: 4px; border-right: none; border-top: 3px solid transparent; }
+            .nav-item:hover, .nav-item.active { border-right: none; border-top: 3px solid var(--primary); background: transparent; }
             #main-content { padding: 15px; padding-bottom: 100px; }
         }
 
-        /* Agentic Chatbot */
-        .chatbot { position: fixed; bottom: 90px; right: 25px; width: 340px; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 999; display: flex; flex-direction: column; transition: 0.3s; transform: translateY(0); }
-        .chatbot.collapsed { transform: translateY(calc(100% - 55px)); }
+        /* AI Assistant */
+        .chatbot { position: fixed; bottom: 90px; right: 25px; width: 340px; background: white; border-radius: var(--radius); box-shadow: 0 12px 30px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 999; display: flex; flex-direction: column; transition: 0.3s; transform: translateY(0); }
+        .chatbot.collapsed { transform: translateY(calc(100% - 60px)); }
         @media (max-width: 768px) { .chatbot { width: 90%; right: 5%; bottom: 85px; } }
-        .chat-head { background: var(--primary); color: white; padding: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border-radius: 11px 11px 0 0; }
-        .chat-body { height: 280px; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; font-size: 0.9em; }
-        .chat-input { display: flex; padding: 10px; background: white; border-top: 1px solid var(--border); border-radius: 0 0 11px 11px; }
-        .chat-input input { padding: 10px; flex-grow: 1; border: none; border-radius: 0; }
-        .chat-input button { width: auto; padding: 10px 15px; border-radius: 6px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.4; word-wrap: break-word; }
-        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; }
-        .msg.user { background: var(--secondary); color: white; align-self: flex-end; }
+        .chat-head { background: var(--primary); color: white; padding: 18px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border-radius: 15px 15px 0 0; }
+        .chat-body { height: 300px; padding: 20px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 12px; font-size: 0.95em; }
+        .chat-input { display: flex; padding: 12px; background: white; border-top: 1px solid var(--border); border-radius: 0 0 15px 15px; }
+        .chat-input input { padding: 10px; flex-grow: 1; border: none; background: transparent; }
+        .chat-input button { width: auto; padding: 10px 18px; box-shadow: none; }
+        .msg { padding: 12px 16px; border-radius: 14px; max-width: 85%; line-height: 1.4; word-wrap: break-word; }
+        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .msg.user { background: var(--primary); color: white; align-self: flex-end; }
     </style>
 </head>
 <body>
 
-<!-- SETUP / LANDING VIEW -->
+<!-- SETUP / LANDING -->
 <div id="viewLanding" class="view-section active" style="display:flex; align-items:center;">
     <div class="landing-container" id="landingStep1">
-        <h1>Finance OS.</h1>
-        <p>A real-time, zero-friction dashboard to track shared capital, audit budgets, and settle balances instantly.</p>
-        <button onclick="createNewDashboard()">Initialize New Master Ledger</button>
+        <h1>💸 Family & Flat</h1>
+        <p>A friendly, simple way to track shared expenses, group dinners, and household bills. No passwords needed.</p>
+        <button onclick="createNewDashboard()">Create a New Group</button>
     </div>
     
     <div class="landing-container" id="landingStep2" style="display:none;">
-        <h1>Join Ledger</h1>
-        <p>You have been securely invited to a live dashboard. Authenticate by providing your name.</p>
+        <h1>👋 Welcome!</h1>
+        <p>You've been invited to join this group. What should we call you?</p>
         <div class="form-group">
-            <input type="text" id="joinName" placeholder="Your Name">
+            <input type="text" id="joinName" placeholder="Your Name (e.g. Sam)">
         </div>
-        <button onclick="joinDashboard()">Enter Dashboard</button>
+        <button onclick="joinDashboard()">Join Group</button>
     </div>
 </div>
 
-<!-- MAIN DASHBOARD VIEW -->
+<!-- MAIN APP -->
 <div id="viewApp" class="view-section" style="display:none;">
     <div style="display:flex; height:100%;">
         <div id="sidebar">
-            <div style="padding: 0 25px 25px 25px; font-weight: 800; font-size: 1.4em; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; letter-spacing: -0.5px;" id="deskLogo">Finance OS<span style="color:var(--accent)">.</span></div>
-            <div class="nav-item active" onclick="nav('dash')">📝 Global Ledger</div>
-            <div class="nav-item" onclick="nav('analytics')">📊 Analytics & Pacing</div>
-            <div class="nav-item" onclick="nav('settle')">🤝 Settle Up</div>
-            <div class="nav-item" onclick="nav('settings')">⚙️ System & Audit</div>
+            <div style="padding: 0 25px 25px 25px; font-weight: 800; font-size: 1.4em; color: var(--primary); border-bottom: 1px solid var(--border); margin-bottom: 15px;" id="deskLogo">💸 Finance OS</div>
+            <div class="nav-item active" onclick="nav('dash')">📝 Add Expenses</div>
+            <div class="nav-item" onclick="nav('analytics')">📊 Summary & Budgets</div>
+            <div class="nav-item" onclick="nav('settle')">🤝 Settle Balances</div>
+            <div class="nav-item" onclick="nav('settings')">⚙️ Settings & Members</div>
         </div>
 
         <div id="main-content">
             <div class="top-bar">
                 <div>
-                    <h3 style="margin: 0;" id="pageTitle">Global Ledger</h3>
-                    <p style="margin: 0; font-size: 0.8em; color: var(--secondary); cursor: pointer; font-weight: bold;" onclick="copyInviteLink()">📋 Copy Encrypted Invite Link</p>
+                    <h3 style="margin: 0; font-size: 1.4em;" id="pageTitle">Expenses</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--primary); cursor: pointer; font-weight: 600;" onclick="copyInviteLink()">📋 Copy Group Invite Link</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span id="headerName" style="font-weight:bold; font-size:0.9em; background:var(--bg); padding:6px 12px; border-radius:20px;"></span>
-                    <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 6px 12px; margin:0;">
-                    <button class="outline" style="width: auto; padding: 6px 12px;" onclick="clearFilter()">All Time</button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="headerName" style="font-weight:600; font-size:0.9em; background:var(--primary-light); color:var(--primary); padding:8px 16px; border-radius:20px;"></span>
+                    <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 10px 14px; margin:0;">
+                    <button class="outline" style="width: auto; padding: 10px 16px; border-radius:20px;" onclick="clearFilter()">Clear</button>
                 </div>
             </div>
 
-            <!-- TAB: LEDGER -->
+            <!-- TAB: EXPENSES -->
             <div id="tab-dash" class="app-tab active">
                 <div class="grid-2">
                     <div class="card" id="entryFormCard">
-                        <h2 id="formTitle">Log Transaction</h2>
+                        <h2 id="formTitle">🧾 Log an Expense</h2>
                         <input type="hidden" id="editId">
                         
                         <div class="grid-2">
                             <div class="form-group"><label>Date</label><input type="date" id="dateInput"></div>
                             <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="amount" placeholder="0"></div>
                         </div>
-                        <div class="form-group"><label>Description</label><input type="text" id="desc" placeholder="e.g., Monthly Internet"></div>
+                        <div class="form-group"><label>What was this for?</label><input type="text" id="desc" placeholder="e.g., Weekend Groceries"></div>
                         <div class="form-group"><label>Category</label><select id="categorySelect"></select></div>
                         
                         <div class="grid-2">
                             <div class="form-group">
-                                <label>Gross Capital Deployed By</label>
+                                <label>Who Paid?</label>
                                 <select id="payerType" onchange="togglePayerType()">
-                                    <option value="single">Single Payer</option>
-                                    <option value="multiple">Multiple Payers (Split Bill)</option>
+                                    <option value="single">One Person</option>
+                                    <option value="multiple">Multiple People (Split Payment)</option>
                                 </select>
-                                <select id="payerSelect" style="margin-top:5px;"></select>
-                                <div id="multiPayerUI" style="display:none; flex-direction:column; gap:5px; margin-top:5px; background:var(--bg); padding:10px; border-radius:8px;"></div>
+                                <select id="payerSelect" style="margin-top:8px;"></select>
+                                <div id="multiPayerUI" style="display:none; flex-direction:column; gap:8px; margin-top:8px; background:var(--bg); padding:15px; border-radius:10px;"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label>Net Liability Distribution</label>
+                                <label>How is it split?</label>
                                 <select id="splitType" onchange="toggleSplit()">
-                                    <option value="equal_all">Equally (All Members)</option>
-                                    <option value="custom">Custom (%)</option>
-                                    <option value="solo">Personal Expense (100/0)</option>
+                                    <option value="equal_all">Equally (Everyone)</option>
+                                    <option value="custom">Custom Percentage (%)</option>
+                                    <option value="solo">Just Me (Personal Expense)</option>
                                 </select>
                             </div>
                         </div>
                         
-                        <div id="customSplitUI" style="display:none; flex-direction: column; gap:10px; margin-bottom:15px; background:var(--bg); padding:15px; border-radius:8px; border:1px solid var(--border);">
-                            <label>Custom Liability Split (%)</label>
-                            <div id="customSplitInputs" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                        <div id="customSplitUI" style="display:none; flex-direction: column; gap:10px; margin-bottom:20px; background:var(--bg); padding:15px; border-radius:10px;">
+                            <label>Who owes what percentage?</label>
+                            <div id="customSplitInputs" style="display:flex; flex-wrap:wrap; gap:12px;"></div>
                         </div>
                         
-                        <div style="display: flex; gap: 10px;">
-                            <button id="submitBtn" onclick="saveExpense()">Commit to Ledger</button>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="submitBtn" onclick="saveExpense()">Save Expense</button>
                             <button id="cancelEditBtn" class="outline" style="display:none; width: auto;" onclick="cancelEdit()">Cancel</button>
                         </div>
                     </div>
 
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <h2 style="margin: 0;">History</h2>
-                            <input type="text" id="searchLedger" placeholder="🔍 Search/Audit..." onkeyup="renderTable()" style="width: 180px; padding: 6px 12px; border-radius:20px;">
+                            <h2 style="margin: 0;">🕒 Recent Activity</h2>
+                            <input type="text" id="searchLedger" placeholder="🔍 Search..." onkeyup="renderTable()" style="width: 150px; padding: 10px 14px; border-radius:20px;">
                         </div>
-                        <div style="overflow-x: auto; margin-top: 15px;">
+                        <div style="overflow-x: auto; margin-top: 20px;">
                             <table id="ledgerTable">
-                                <thead><tr><th>Date</th><th>Item</th><th>Gross Payer(s)</th><th>₹ Total</th><th>Actions</th></tr></thead>
+                                <thead><tr><th>Date</th><th>Details</th><th>Paid By</th><th>₹ Total</th><th></th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -182,74 +198,87 @@
                 </div>
             </div>
 
-            <!-- TAB: ANALYTICS & PACING -->
+            <!-- TAB: SUMMARY & BUDGETS -->
             <div id="tab-analytics" class="app-tab" style="display:none;">
                 <div class="grid-2">
                     <div class="master-balance">
-                        <p style="margin: 0 0 8px 0; font-size: 0.85em; opacity: 0.8; text-transform: uppercase;">Master Net Balance</p>
-                        <h2 id="settlementText" style="margin: 0; font-size:1.8em;">Syncing...</h2>
+                        <p style="margin: 0 0 10px 0; font-size: 0.9em; opacity: 0.9; text-transform: uppercase; font-weight:600;">Overall Group Balance</p>
+                        <h2 id="settlementText" style="margin: 0; font-size:2em; font-weight:800;">Syncing...</h2>
                     </div>
                     <div class="card" style="margin:0;">
-                        <h3>Budget Pacing (Month-to-Date)</h3>
+                        <h3 style="margin-top:0;">🎯 Monthly Spending Goal</h3>
                         <div id="pacingUI"></div>
                     </div>
                 </div>
                 
                 <div class="card" style="margin-top: 25px;">
-                    <h3>Member Overview <span id="periodText" style="font-size:0.7em; color:var(--muted); font-weight:normal;"></span></h3>
+                    <h3 style="margin-top:0;">👥 Individual Summary <span id="periodText" style="font-size:0.8em; color:var(--muted); font-weight:normal;"></span></h3>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px;" id="analyticsGrid"></div>
                 </div>
 
                 <div class="grid-2">
-                    <div class="card"><h3>Category Breakdown</h3><div style="height: 250px;"><canvas id="categoryChart"></canvas></div></div>
-                    <div class="card"><h3>Capital vs. Liability</h3><div style="height: 250px;"><canvas id="barChart"></canvas></div></div>
+                    <div class="card"><h3 style="margin-top:0;">Where is the money going?</h3><div style="height: 250px;"><canvas id="categoryChart"></canvas></div></div>
+                    <div class="card"><h3 style="margin-top:0;">Paid vs. Consumed</h3><div style="height: 250px;"><canvas id="barChart"></canvas></div></div>
                 </div>
             </div>
 
             <!-- TAB: SETTLE UP -->
             <div id="tab-settle" class="app-tab" style="display:none;">
                 <div class="card" style="max-width: 600px; margin: 0 auto;">
-                    <h2 style="text-align: center;">Record Master Payment</h2>
-                    <p style="text-align: center; color: var(--muted); font-size: 0.9em; margin-bottom: 25px;">Log cash transfers here to balance the books without deleting historical data.</p>
+                    <h2 style="text-align: center; margin-top:0;">🤝 Record a Payment</h2>
+                    <p style="text-align: center; color: var(--muted); margin-bottom: 30px;">Did someone pay someone else back? Log it here to balance the group's math without messing up your expense history.</p>
                     <div class="grid-2">
-                        <div class="form-group"><label>Transfer Date</label><input type="date" id="settleDate"></div>
-                        <div class="form-group"><label>Amount (₹)</label><input type="number" id="settleAmount" placeholder="0"></div>
+                        <div class="form-group"><label>Date of Payment</label><input type="date" id="settleDate"></div>
+                        <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="settleAmount" placeholder="0"></div>
                     </div>
                     <div class="grid-2">
-                        <div class="form-group"><label>Capital Origin (Sender)</label><select id="settleSender"></select></div>
-                        <div class="form-group"><label>Capital Destination (Receiver)</label><select id="settleReceiver"></select></div>
+                        <div class="form-group"><label>Who Sent The Money?</label><select id="settleSender"></select></div>
+                        <div class="form-group"><label>Who Received It?</label><select id="settleReceiver"></select></div>
                     </div>
-                    <button class="success" onclick="addSettlement()">Commit Settlement</button>
+                    <button class="success" onclick="addSettlement()">Save Payment</button>
                 </div>
             </div>
 
-            <!-- TAB: SETTINGS & AUDIT -->
+            <!-- TAB: SETTINGS & MEMBERS -->
             <div id="tab-settings" class="app-tab" style="display:none;">
                 <div class="grid-2">
+                    
                     <div class="card">
-                        <h2>System Config</h2>
+                        <h2 style="margin-top:0;">👥 Group Members</h2>
+                        <p style="font-size: 0.9em; color: var(--muted); margin-top:-10px;">People who have joined via the link:</p>
+                        <div id="memberListDisplay" style="margin-bottom: 25px;"></div>
+                        
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                        
+                        <label>Add a Person Manually</label>
+                        <p style="font-size: 0.85em; color: var(--muted); margin-top:-5px; margin-bottom:15px;">Want to track expenses for someone who doesn't want to use the app (like a parent or flatmate)? Add them here.</p>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="manualMemberAdd" placeholder="e.g., Mom">
+                            <button style="width: auto; padding: 10px 20px;" onclick="addManualMember()">Add Person</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 style="margin-top:0;">⚙️ Dashboard Setup</h2>
                         <div class="form-group">
-                            <label>Monthly Household Budget (₹)</label>
+                            <label>Monthly Spending Goal (Budget ₹)</label>
                             <input type="number" id="monthlyBudget" placeholder="0" onblur="updateBudget()">
                         </div>
                         <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                        <label>Manage Categories</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;"><input type="text" id="newCat" placeholder="e.g., Subscriptions"><button style="width: 80px;" onclick="addCategory()">Add</button></div>
+                        
+                        <label>Categories</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;"><input type="text" id="newCat" placeholder="e.g., Pet Supplies"><button style="width: 80px;" onclick="addCategory()">Add</button></div>
                         <div id="categoryTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                        
                         <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                        <button class="outline" onclick="exportCSV()">📊 Export Full Ledger (CSV)</button>
-                    </div>
-                    
-                    <div class="card">
-                        <h2>Immutable Audit Trail</h2>
-                        <p style="font-size:0.8em; color:var(--muted); margin-top:-10px;">Tracks all destructive/edit actions for transparency.</p>
-                        <div id="auditLogUI" style="max-height: 280px; overflow-y:auto; font-size: 0.85em; background:var(--bg); padding:10px; border-radius:8px; border:1px solid var(--border);">
-                        </div>
+                        <button class="outline" onclick="exportCSV()">📥 Download Spreadsheet (CSV)</button>
                     </div>
                 </div>
-                <div class="card" style="border-left: 4px solid var(--danger);">
-                    <h2 style="color:var(--danger)">Danger Zone</h2>
-                    <button class="danger" style="max-width: 250px;" onclick="factoryReset()">⚠️ Delete Entire Dashboard</button>
+                
+                <div class="card">
+                    <h2 style="margin-top:0;">📝 Activity Log</h2>
+                    <p style="font-size:0.85em; color:var(--muted); margin-top:-10px;">A transparent history of who added, edited, or deleted expenses.</p>
+                    <div id="auditLogUI" style="max-height: 250px; overflow-y:auto; font-size: 0.9em; background:var(--bg); padding:15px; border-radius:10px;"></div>
                 </div>
             </div>
 
@@ -257,11 +286,11 @@
     </div>
 </div>
 
-<!-- CHATBOT -->
+<!-- AI ASSISTANT -->
 <div class="chatbot collapsed" id="chatbotMain">
-    <div class="chat-head" onclick="toggleChat()"><span>Finance Agent 🤖</span><span id="chatToggleIcon">▲</span></div>
+    <div class="chat-head" onclick="toggleChat()"><span>Ask AI Assistant ✨</span><span id="chatToggleIcon" style="font-size:0.8em;">▲</span></div>
     <div class="chat-body" id="chatBody"></div>
-    <div class="chat-input" id="chatInputArea"><input type="text" id="chatQ" placeholder="Ask about expenses..." onkeypress="if(event.key === 'Enter') askBot()"><button onclick="askBot()">Ask</button></div>
+    <div class="chat-input" id="chatInputArea"><input type="text" id="chatQ" placeholder="E.g., How much on groceries?" onkeypress="if(event.key === 'Enter') askBot()"><button onclick="askBot()">Send</button></div>
 </div>
 
 <script>
@@ -307,7 +336,7 @@
         await db.collection('shared_dashboards').doc(newId).set({
             created_at: Date.now(),
             members: [],
-            categories: ["Rent", "Groceries", "Utilities", "Dining Out", "Household", "Investments", "Health & Wellness", "Other"],
+            categories: ["Rent", "Groceries", "Utilities", "Dining Out", "Household", "Investments (SIPs)", "Health & Ayurveda", "Other"],
             expenses: [],
             auditLog: [],
             monthlyBudget: 0
@@ -327,18 +356,17 @@
         document.getElementById('viewLanding').style.display = 'none';
         document.getElementById('viewApp').style.display = 'block';
         document.getElementById('headerName').innerText = `👤 ${myName}`;
-        if(window.innerWidth > 768) document.getElementById('deskLogo').style.display = 'block'; else document.getElementById('deskLogo').style.display = 'none';
 
         db.collection('shared_dashboards').doc(dashboardId).onSnapshot((doc) => {
             if (doc.exists) {
                 appData = doc.data();
                 if(!appData.members.includes(myName)) {
                     appData.members.push(myName);
-                    logAudit(`Joined the dashboard.`);
+                    logAudit(`${myName} joined the group.`);
                     syncToCloud();
                 } else { renderApp(); }
             } else {
-                alert("Dashboard not found. It may have been deleted.");
+                alert("Group not found. It may have been deleted.");
                 window.location.href = window.location.pathname; 
             }
         });
@@ -351,22 +379,34 @@
         appData.auditLog.push({ date: new Date().toISOString(), user: myName, action: action });
     }
 
+    // --- NAVIGATION ---
     function nav(tabId) {
         document.querySelectorAll('.app-tab').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`tab-${tabId}`).style.display = 'block';
         event.currentTarget.classList.add('active');
-        const titles = { 'dash': 'Global Ledger', 'analytics': 'Analytics & Pacing', 'settle': 'Settle Up', 'settings': 'System Config & Audit' };
+        const titles = { 'dash': 'Expenses', 'analytics': 'Summary & Budgets', 'settle': 'Settle Balances', 'settings': 'Settings & Members' };
         document.getElementById('pageTitle').innerText = titles[tabId];
         window.scrollTo(0,0);
     }
     
-    function copyInviteLink() { navigator.clipboard.writeText(window.location.href); alert("Invite Link Copied! Send this to your flatmates."); }
+    function copyInviteLink() { navigator.clipboard.writeText(window.location.href); alert("Invite Link Copied! Send it to your group."); }
     function clearFilter() { document.getElementById('globalMonthFilter').value = ''; renderApp(); }
     function getFilteredData() {
         const filter = document.getElementById('globalMonthFilter').value;
         if (!filter) return appData.expenses;
         return appData.expenses.filter(e => e.date.startsWith(filter));
+    }
+
+    // --- MEMBER MANAGEMENT ---
+    function addManualMember() {
+        const name = document.getElementById('manualMemberAdd').value.trim();
+        if(!name) return;
+        if(appData.members.includes(name)) return alert("This person is already in the group.");
+        appData.members.push(name);
+        logAudit(`${myName} manually added ${name} to the group.`);
+        document.getElementById('manualMemberAdd').value = '';
+        syncToCloud();
     }
 
     // --- DYNAMIC UI TOGGLES ---
@@ -380,7 +420,7 @@
             select.style.display = 'none'; multiUI.style.display = 'flex';
             multiUI.innerHTML = '';
             appData.members.forEach(m => {
-                multiUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center;"><span>${m}</span> <input type="number" class="multi-payer-val" data-member="${m}" placeholder="₹ Paid" style="width:120px; margin:0;"></div>`;
+                multiUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center;"><span>${m}</span> <input type="number" class="multi-payer-val" data-member="${m}" placeholder="₹ Paid" style="width:120px; margin:0; padding:8px;"></div>`;
             });
         }
     }
@@ -391,11 +431,11 @@
         const container = document.getElementById('customSplitInputs');
         if (type === 'custom') {
             ui.style.display = 'flex'; container.innerHTML = '';
-            appData.members.forEach(m => { container.innerHTML += `<div style="flex:1; min-width:100px;"><label style="text-transform:none;">${m}</label><input type="number" class="custom-split-val" data-member="${m}" placeholder="%"></div>`; });
+            appData.members.forEach(m => { container.innerHTML += `<div style="flex:1; min-width:120px;"><label style="text-transform:none;">${m}</label><input type="number" class="custom-split-val" data-member="${m}" placeholder="%" style="padding:10px;"></div>`; });
         } else { ui.style.display = 'none'; }
     }
 
-    // --- CRUD OPERATIONS ---
+    // --- EXPENSE CRUD ---
     function saveExpense() {
         const id = document.getElementById('editId').value;
         const date = document.getElementById('dateInput').value;
@@ -405,9 +445,8 @@
         const splitType = document.getElementById('splitType').value;
         const payerType = document.getElementById('payerType').value;
 
-        if(!date || !desc || !amount) return alert("Fill all primary details.");
+        if(!date || !desc || !amount) return alert("Please fill out the Date, Description, and Amount.");
 
-        // Resolve Payers
         let payers = {};
         if (payerType === 'single') {
             payers[document.getElementById('payerSelect').value] = amount;
@@ -418,16 +457,15 @@
                 if(v > 0) payers[inp.dataset.member] = v;
                 tPaid += v;
             });
-            if (Math.abs(tPaid - amount) > 0.1) return alert(`Multi-payer total (₹${tPaid}) must exactly equal the expense amount (₹${amount}).`);
+            if (Math.abs(tPaid - amount) > 0.1) return alert(`The split payment amounts (₹${tPaid}) must add up to the total expense (₹${amount}).`);
         }
 
-        // Resolve Liability Shares
         let shares = {};
         if (splitType === 'equal_all') {
             const val = amount / appData.members.length;
             appData.members.forEach(m => shares[m] = val);
         } else if (splitType === 'solo') {
-            if(Object.keys(payers).length > 1) return alert("Solo splits require a single payer.");
+            if(Object.keys(payers).length > 1) return alert("Personal expenses must have a single payer.");
             appData.members.forEach(m => shares[m] = (m === Object.keys(payers)[0]) ? amount : 0);
         } else if (splitType === 'custom') {
             let totalPct = 0;
@@ -435,7 +473,7 @@
                 const pct = parseFloat(input.value) || 0; totalPct += pct;
                 shares[input.dataset.member] = amount * (pct / 100);
             });
-            if(Math.abs(totalPct - 100) > 0.1) return alert("Custom split percentages must equal 100.");
+            if(Math.abs(totalPct - 100) > 0.1) return alert("Custom percentages must equal 100%.");
         }
 
         const expenseObj = { id: id ? parseInt(id) : Date.now(), type: 'expense', date, desc, amount, cat, payers, shares, splitType, payerType };
@@ -443,11 +481,11 @@
         if (id) {
             const idx = appData.expenses.findIndex(e => e.id == id);
             if(idx > -1) appData.expenses[idx] = expenseObj;
-            logAudit(`Edited transaction: '${desc}' (₹${amount})`);
+            logAudit(`Updated expense: '${desc}' (₹${amount})`);
             cancelEdit();
         } else {
             appData.expenses.push(expenseObj);
-            logAudit(`Added transaction: '${desc}' (₹${amount})`);
+            logAudit(`Added expense: '${desc}' (₹${amount})`);
             document.getElementById('desc').value = ''; document.getElementById('amount').value = '';
         }
         syncToCloud();
@@ -460,17 +498,14 @@
         document.getElementById('categorySelect').value = ex.cat; 
         
         document.getElementById('payerType').value = ex.payerType || 'single'; togglePayerType();
-        if(ex.payerType === 'multiple') {
-            document.querySelectorAll('.multi-payer-val').forEach(inp => inp.value = ex.payers[inp.dataset.member] || '');
-        } else { document.getElementById('payerSelect').value = Object.keys(ex.payers)[0]; }
+        if(ex.payerType === 'multiple') { document.querySelectorAll('.multi-payer-val').forEach(inp => inp.value = ex.payers[inp.dataset.member] || ''); } 
+        else { document.getElementById('payerSelect').value = Object.keys(ex.payers)[0]; }
 
         document.getElementById('splitType').value = ex.splitType || 'equal_all'; toggleSplit();
-        if (ex.splitType === 'custom') {
-            document.querySelectorAll('.custom-split-val').forEach(input => input.value = Math.round((ex.shares[input.dataset.member] / ex.amount) * 100));
-        }
+        if (ex.splitType === 'custom') { document.querySelectorAll('.custom-split-val').forEach(input => input.value = Math.round((ex.shares[input.dataset.member] / ex.amount) * 100)); }
         
-        document.getElementById('formTitle').innerText = 'Update Transaction';
-        document.getElementById('submitBtn').innerText = 'Commit Changes'; document.getElementById('submitBtn').className = 'warning';
+        document.getElementById('formTitle').innerText = '✏️ Edit Expense';
+        document.getElementById('submitBtn').innerText = 'Save Changes'; 
         document.getElementById('cancelEditBtn').style.display = 'block'; window.scrollTo(0,0);
     }
 
@@ -478,74 +513,66 @@
         document.getElementById('editId').value = ''; document.getElementById('desc').value = ''; document.getElementById('amount').value = '';
         document.getElementById('splitType').value = 'equal_all'; toggleSplit();
         document.getElementById('payerType').value = 'single'; togglePayerType();
-        document.getElementById('formTitle').innerText = 'Log Transaction';
-        document.getElementById('submitBtn').innerText = 'Commit to Ledger'; document.getElementById('submitBtn').className = '';
+        document.getElementById('formTitle').innerText = '🧾 Log an Expense';
+        document.getElementById('submitBtn').innerText = 'Save Expense';
         document.getElementById('cancelEditBtn').style.display = 'none';
     }
 
     function deleteRecord(id) {
         const ex = appData.expenses.find(e => e.id === id);
-        if(confirm("Permanently delete this record? This action is logged.")) { 
+        if(confirm("Delete this record permanently?")) { 
             appData.expenses = appData.expenses.filter(e => e.id !== id); 
-            logAudit(`Deleted transaction: '${ex.desc}'`);
-            cancelEdit(); syncToCloud(); 
+            logAudit(`Deleted record: '${ex.desc}'`); cancelEdit(); syncToCloud(); 
         }
     }
     
     function duplicateRecord(id) {
         const ex = appData.expenses.find(e => e.id === id);
         if(ex) {
-            let dupe = JSON.parse(JSON.stringify(ex)); // Deep copy
-            dupe.id = Date.now();
-            dupe.date = new Date().toISOString().split('T')[0]; // Set to today
+            let dupe = JSON.parse(JSON.stringify(ex));
+            dupe.id = Date.now(); dupe.date = new Date().toISOString().split('T')[0];
             appData.expenses.push(dupe);
-            logAudit(`Duplicated transaction: '${dupe.desc}'`);
-            syncToCloud();
+            logAudit(`Duplicated recurring expense: '${dupe.desc}'`); syncToCloud();
         }
     }
 
     function addSettlement() {
         const date = document.getElementById('settleDate').value; const amount = parseFloat(document.getElementById('settleAmount').value);
         const sender = document.getElementById('settleSender').value; const receiver = document.getElementById('settleReceiver').value;
-        if(!date || !amount) return alert("Required fields missing.");
-        if(sender === receiver) return alert("Sender and receiver cannot be identical.");
+        if(!date || !amount) return alert("Please enter date and amount.");
+        if(sender === receiver) return alert("Sender and receiver can't be the same person.");
         
         appData.expenses.push({ id: Date.now(), type: 'settlement', date, desc: `Payment to ${receiver}`, amount, cat: 'Settlement', sender, receiver });
-        logAudit(`Logged master settlement: ${sender} paid ${receiver} ₹${amount}`);
+        logAudit(`Logged payment: ${sender} paid ${receiver} ₹${amount}`);
         document.getElementById('settleAmount').value = ''; syncToCloud(); nav('analytics');
     }
 
     // --- SETTINGS ---
-    function updateBudget() {
-        appData.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0;
-        logAudit(`Updated monthly budget to ₹${appData.monthlyBudget}`);
-        syncToCloud();
-    }
+    function updateBudget() { appData.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0; logAudit(`Updated monthly goal to ₹${appData.monthlyBudget}`); syncToCloud(); }
     function addCategory() { const val = document.getElementById('newCat').value.trim(); if(val && !appData.categories.includes(val)) { appData.categories.push(val); document.getElementById('newCat').value = ''; logAudit(`Added category: ${val}`); syncToCloud(); } }
     function removeCategory(cat) { if(cat==="Settlement") return; appData.categories = appData.categories.filter(c => c !== cat); logAudit(`Removed category: ${cat}`); syncToCloud(); }
-    function factoryReset() { if(confirm("WARNING: This destroys the dashboard for ALL members.")) { db.collection('shared_dashboards').doc(dashboardId).delete().then(() => window.location.href = window.location.pathname); } }
 
     // --- RENDER ENGINE ---
     function renderApp() {
         if(!appData) return;
-        
-        // Settings UI
         document.getElementById('monthlyBudget').value = appData.monthlyBudget || '';
         
         const catSelect = document.getElementById('categorySelect'); const catTags = document.getElementById('categoryTags');
         catSelect.innerHTML = ''; catTags.innerHTML = '';
         appData.categories.forEach(c => {
             if(c !== 'Settlement') catSelect.innerHTML += `<option value="${c}">${c}</option>`;
-            catTags.innerHTML += `<div class="member-badge" style="background:#e2e8f0; color:var(--text);">${c} <span style="color:var(--danger); cursor:pointer; margin-left:5px;" onclick="removeCategory('${c}')">×</span></div>`;
+            catTags.innerHTML += `<div class="badge">${c} <span style="color:var(--danger); cursor:pointer; margin-left:8px;" onclick="removeCategory('${c}')">×</span></div>`;
         });
 
         const pSelect = document.getElementById('payerSelect'); const sSend = document.getElementById('settleSender'); const sRec = document.getElementById('settleReceiver');
-        pSelect.innerHTML = ''; sSend.innerHTML = ''; sRec.innerHTML = ''; 
+        const mList = document.getElementById('memberListDisplay');
+        pSelect.innerHTML = ''; sSend.innerHTML = ''; sRec.innerHTML = ''; mList.innerHTML = '';
         
         appData.members.forEach(m => {
             pSelect.innerHTML += `<option value="${m}">${m} ${m===myName?'(You)':''}</option>`;
             sSend.innerHTML += `<option value="${m}">${m}</option>`;
             sRec.innerHTML += `<option value="${m}">${m}</option>`;
+            mList.innerHTML += `<span class="badge">${m}</span>`;
         });
         if(appData.members.includes(myName)) { pSelect.value = myName; sSend.value = myName; }
 
@@ -561,19 +588,17 @@
         
         [...data].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ex => {
             const isSettlement = ex.type === 'settlement';
-            let payerStr = isSettlement ? ex.sender : Object.keys(ex.payers).join(', ');
+            let payerStr = isSettlement ? ex.sender : Object.keys(ex.payers).join(' & ');
             
-            let actions = `<button class="icon-btn" title="Delete" onclick="deleteRecord(${ex.id})">🗑️</button>`;
-            if (!isSettlement) {
-                actions = `<button class="icon-btn" title="Edit" onclick="editRecord(${ex.id})">✏️</button> <button class="icon-btn" title="Duplicate (Recurring)" onclick="duplicateRecord(${ex.id})">🔁</button> ` + actions;
-            }
+            let actions = `<button class="action-icon" title="Delete" onclick="deleteRecord(${ex.id})">🗑️</button>`;
+            if (!isSettlement) actions = `<button class="action-icon" title="Edit" onclick="editRecord(${ex.id})">✏️</button> <button class="action-icon" title="Duplicate (Repeat)" onclick="duplicateRecord(${ex.id})">🔁</button> ` + actions;
             
             tbody.innerHTML += `<tr class="${isSettlement ? 'row-settlement' : ''}">
-                <td style="font-size:0.8em; color:var(--muted);">${ex.date.substring(5)}</td>
-                <td style="font-weight:500;">${ex.desc} <br><span style="font-size:0.7em; color:var(--secondary)">${ex.cat}</span></td>
-                <td><span style="background:var(--bg); padding:3px 8px; border-radius:10px; font-size:0.8em; border:1px solid var(--border);">${payerStr}</span></td>
-                <td style="font-weight:bold;">₹${ex.amount.toLocaleString()}</td>
-                <td style="display:flex; gap:5px;">${actions}</td>
+                <td style="color:var(--muted); font-size:0.9em;">${ex.date.substring(5)}</td>
+                <td style="font-weight:600; color:var(--text);">${ex.desc} <br><span style="font-size:0.75em; color:var(--primary); font-weight:normal;">${ex.cat}</span></td>
+                <td><span class="badge" style="margin:0; padding:5px 10px;">${payerStr}</span></td>
+                <td style="font-weight:700; color:var(--text);">₹${ex.amount.toLocaleString()}</td>
+                <td style="display:flex;">${actions}</td>
             </tr>`;
         });
     }
@@ -584,7 +609,6 @@
         appData.members.forEach(m => { balances[m] = { paid:0, liability:0 }; allTimeBalances[m] = { paid:0, liability:0 }; });
         const catData = {};
 
-        // Math: Filtered Period
         fData.forEach(ex => {
             if(ex.type === 'expense') {
                 Object.keys(ex.payers).forEach(p => { if(balances[p]) balances[p].paid += ex.payers[p]; });
@@ -593,7 +617,6 @@
             }
         });
 
-        // Math: Master All-Time Setup
         allData.forEach(ex => {
             if(ex.type === 'expense') {
                 Object.keys(ex.payers).forEach(p => { if(allTimeBalances[p]) allTimeBalances[p].paid += ex.payers[p]; });
@@ -608,68 +631,62 @@
         let settlementLogic = [];
 
         appData.members.forEach(m => {
-            grid.innerHTML += `<div class="stat-card"><strong>${m}</strong><hr style="border:0; border-top:1px solid var(--border);"><p style="font-size:0.75em; color:var(--muted); margin:5px 0;">Gross Paid</p><strong style="color:var(--secondary); font-size:1.2em;">₹${balances[m].paid.toFixed(0)}</strong><p style="font-size:0.75em; color:var(--muted); margin:10px 0 5px 0;">Net Liability</p><strong style="color:var(--danger); font-size:1.2em;">₹${balances[m].liability.toFixed(0)}</strong></div>`;
+            grid.innerHTML += `<div class="stat-card"><strong style="font-size:1.1em;">${m}</strong><hr style="border:0; border-top:1px solid var(--border); margin:15px 0;"><p style="font-size:0.8em; color:var(--muted); margin:0 0 5px 0;">Total Paid</p><strong style="color:var(--secondary); font-size:1.3em;">₹${balances[m].paid.toFixed(0)}</strong><p style="font-size:0.8em; color:var(--muted); margin:15px 0 5px 0;">Their Share</p><strong style="color:var(--danger); font-size:1.3em;">₹${balances[m].liability.toFixed(0)}</strong></div>`;
             const net = allTimeBalances[m].paid - allTimeBalances[m].liability;
             if(Math.abs(net) > 1) settlementLogic.push({ name: m, net: net });
         });
 
         settlementLogic.sort((a,b) => b.net - a.net);
         const sText = document.getElementById('settlementText');
-        if(settlementLogic.length === 0) { sText.innerText = "All settled up!"; sText.style.color = "white"; }
+        if(settlementLogic.length === 0) { sText.innerText = "All settled up! 🎉"; sText.style.color = "white"; }
         else {
             let topCreditor = settlementLogic[0]; let topDebtor = settlementLogic[settlementLogic.length - 1];
             sText.innerText = `${topDebtor.name} owes ${topCreditor.name} ₹${Math.abs(topDebtor.net).toFixed(0)}`;
-            sText.style.color = "#38bdf8";
+            sText.style.color = "white";
         }
 
         // Budget Pacing UI
         const budget = appData.monthlyBudget || 0;
         const pacingUI = document.getElementById('pacingUI');
         if (budget > 0) {
-            const dateObj = new Date();
-            const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
+            const dateObj = new Date(); const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
             const expectedBurn = (dateObj.getDate() / daysInMonth) * 100;
             const currentMonth = dateObj.toISOString().substring(0, 7);
             const spentThisMonth = appData.expenses.filter(e => e.date.startsWith(currentMonth) && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
             const actualBurn = (spentThisMonth / budget) * 100;
-            const status = actualBurn > expectedBurn ? '<span style="color:var(--danger); font-weight:bold;">⚠️ Overpacing</span>' : '<span style="color:var(--success); font-weight:bold;">✅ On Track</span>';
+            const status = actualBurn > expectedBurn ? '<span style="color:var(--danger); font-weight:bold;">⚠️ Spending fast</span>' : '<span style="color:var(--secondary); font-weight:bold;">✅ Looking good</span>';
             
             pacingUI.innerHTML = `
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9em;"><span>Month Spend: <strong>₹${spentThisMonth.toLocaleString()}</strong></span> <span>Cap: ₹${budget.toLocaleString()}</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8em; color:var(--muted);"><span>Actual Burn: ${actualBurn.toFixed(1)}%</span> <span>Expected: ${expectedBurn.toFixed(1)}%</span></div>
-                <div style="background:var(--border); height:12px; border-radius:6px; overflow:hidden; margin-bottom:10px;"><div style="background:${actualBurn > expectedBurn ? 'var(--danger)' : 'var(--success)'}; width:${Math.min(actualBurn, 100)}%; height:100%; transition:0.3s;"></div></div>
-                <div style="text-align:center; font-size:0.9em;">Status: ${status}</div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.95em;"><span>Spent: <strong>₹${spentThisMonth.toLocaleString()}</strong></span> <span>Goal: ₹${budget.toLocaleString()}</span></div>
+                <div style="background:var(--border); height:14px; border-radius:7px; overflow:hidden; margin-bottom:12px;"><div style="background:${actualBurn > expectedBurn ? 'var(--danger)' : 'var(--secondary)'}; width:${Math.min(actualBurn, 100)}%; height:100%; transition:0.4s ease-out;"></div></div>
+                <div style="text-align:center; font-size:0.9em; background:var(--bg); padding:10px; border-radius:10px;">Status: ${status}</div>
             `;
-        } else {
-            pacingUI.innerHTML = `<p style="color:var(--muted); text-align:center; margin:10px 0;">Configure a Monthly Budget in Settings to unlock pacing insights.</p>`;
-        }
+        } else { pacingUI.innerHTML = `<p style="color:var(--muted); text-align:center; padding:20px; background:var(--bg); border-radius:10px;">Set a monthly goal in Settings to see insights here.</p>`; }
 
         // Charts
         if (chartPie) chartPie.destroy();
-        if (Object.keys(catData).length > 0) {
-            chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#64748b'] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins:{legend:{position:'right', labels:{boxWidth:12,font:{size:10}}}} } });
-        }
+        if (Object.keys(catData).length > 0) { chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#0ea5e9', '#94a3b8'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins:{legend:{position:'right', labels:{boxWidth:12,font:{size:11}}}} } }); }
         
         if (chartBar) chartBar.destroy();
         const labels = appData.members; const paid = labels.map(m => balances[m].paid); const liab = labels.map(m => balances[m].liability);
-        chartBar = new Chart(document.getElementById('barChart').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: [{ label: 'Gross Paid', data: paid, backgroundColor: '#2563eb', borderRadius:4 }, { label: 'Net Liability', data: liab, backgroundColor: '#ef4444', borderRadius:4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true, grid:{color:'#f1f5f9'}}, x:{grid:{display:false}}} } });
+        chartBar = new Chart(document.getElementById('barChart').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: [{ label: 'Paid', data: paid, backgroundColor: '#6366f1', borderRadius:6 }, { label: 'Their Share', data: liab, backgroundColor: '#f43f5e', borderRadius:6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true, grid:{color:'#f3f4f6'}}, x:{grid:{display:false}}} } });
     }
 
     function renderAuditLog() {
         const auditDiv = document.getElementById('auditLogUI'); auditDiv.innerHTML = '';
         (appData.auditLog || []).slice(-30).reverse().forEach(log => {
-            auditDiv.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:8px 0;"><strong>${log.user}</strong>: ${log.action} <br><span style="color:var(--muted); font-size:0.8em;">${new Date(log.date).toLocaleString()}</span></div>`;
+            auditDiv.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:12px 0;"><strong>${log.user}</strong>: ${log.action} <br><span style="color:var(--muted); font-size:0.85em; display:block; margin-top:4px;">${new Date(log.date).toLocaleString()}</span></div>`;
         });
     }
 
     function exportCSV() {
         if(appData.expenses.length === 0) return alert("No data!");
-        let csv = `Date,Type,Description,Category,Gross Payers,Total Amount\n`;
+        let csv = `Date,Type,Description,Category,Who Paid,Total Amount\n`;
         appData.expenses.forEach(ex => {
             let payerStr = ex.type === 'settlement' ? ex.sender : Object.keys(ex.payers).join(' & ');
             csv += `"${ex.date}","${ex.type}","${ex.desc}","${ex.cat}","${payerStr}",${ex.amount}\n`;
         });
-        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Full_Ledger_Export.csv`; a.click();
+        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Household_Expenses.csv`; a.click();
     }
 
     // --- CHATBOT ---
@@ -678,10 +695,10 @@
         const input = document.getElementById('chatQ'); const q = input.value.toLowerCase().trim(); if(!q) return;
         const b = document.getElementById('chatBody'); b.innerHTML += `<div class="msg user">${input.value}</div>`; input.value = ''; b.scrollTop = b.scrollHeight;
         setTimeout(() => {
-            let res = "I analyze the active dashboard. Ask about 'total expenses', 'who owes who', or category summaries.";
+            let res = "I look at your household data. Ask me 'who owes money', 'total spent', or ask about a specific category like 'groceries'.";
             if (q.includes('owe') || q.includes('settle')) res = document.getElementById('settlementText').innerText;
-            else if (q.includes('total')) res = `Total expenses for this period: <strong>₹${getFilteredData().filter(e=>e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong>.`;
-            else { const match = appData.categories.find(c => q.includes(c.toLowerCase())); if(match) res = `Spend on <strong>${match}</strong>: <strong>₹${getFilteredData().filter(e=>e.cat===match && e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong>.`; }
+            else if (q.includes('total')) res = `Total expenses for this period are <strong>₹${getFilteredData().filter(e=>e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong>.`;
+            else { const match = appData.categories.find(c => q.includes(c.toLowerCase())); if(match) res = `You've spent <strong>₹${getFilteredData().filter(e=>e.cat===match && e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong> on <strong>${match}</strong>.`; }
             b.innerHTML += `<div class="msg bot">${res}</div>`; b.scrollTop = b.scrollHeight;
         }, 500);
     }
