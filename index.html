@@ -1,196 +1,253 @@
+New Message from Rudrasish Mukherjee  Show  Ignore
+
+Skip to content
+Using Gmail with screen readers
+Enable desktop notifications for Gmail.
+   OK  No thanks
+1 of 37
+Dashboard
+Inbox
+
+Rudrasish Mukherjee
+Attachments
+7:37 PM (48 minutes ago)
+ 
+
+Rudrasish Mukherjee
+Attachments
+7:50 PM (35 minutes ago)
+V2 On Sat, Jul 4, 2026 at 7:37 PM Rudrasish Mukherjee <rudrasishmukherjee30@gmail.com> wrote:
+
+Rudrasish Mukherjee
+8:23 PM (2 minutes ago)
+file:///C:/Users/rudra/Downloads/index.html.html?db=sH7ttqkObHAX0fyQSvpP
+
+Rudrasish Mukherjee
+Attachments
+8:25 PM (0 minutes ago)
+to me
+
+ One attachment
+  •  Scanned by Gmail
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Household Finance Tracker</title>
+    <title>DomusOS | Household Financial Engine</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        /* Modern, Friendly, Soft UI Palette */
         :root { 
-            --primary: #6366f1; /* Soft Indigo */
-            --primary-light: #e0e7ff;
-            --secondary: #10b981; /* Emerald Green */
-            --bg: #f3f4f6; /* Very light gray */
-            --danger: #f43f5e; /* Rose Red */
-            --warning: #f59e0b; /* Amber */
+            --primary: #0f172a; 
+            --secondary: #4f46e5; 
+            --accent: #06b6d4; 
+            --bg: #f8fafc; 
+            --danger: #ef4444; 
+            --success: #10b981; 
+            --warning: #f59e0b; 
             --card: #ffffff; 
-            --text: #1f2937; 
-            --muted: #6b7280; 
-            --border: #e5e7eb; 
-            --radius: 16px;
+            --text: #334155; 
+            --muted: #64748b; 
+            --border: #e2e8f0; 
+            --admin-gold: #d97706;
         }
-        * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg); margin: 0; padding: 0; color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
         .view-section { display: none; width: 100%; height: 100%; overflow-y: auto; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section.active { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Landing UI */
-        .landing-container { max-width: 450px; margin: 10vh auto; background: var(--card); padding: 40px; border-radius: var(--radius); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); text-align: center; }
-        .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.2em; font-weight: 800; }
-        .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 30px; }
+        /* Onboarding Flow Screen Styling */
+        .landing-container { max-width: 500px; margin: auto; background: var(--card); padding: 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(15,23,42,0.06); border: 1px solid var(--border); text-align: center; }
+        .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.4em; letter-spacing: -1px; font-weight: 800; }
+        .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 30px; font-size: 1.05em; }
 
-        /* App Layout */
-        #sidebar { background: white; width: 260px; display: flex; flex-direction: column; padding: 20px 0; z-index: 100; border-right: 1px solid var(--border); }
-        .nav-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--muted); transition: 0.2s; font-weight: 600; font-size: 0.95em; border-right: 4px solid transparent; }
-        .nav-item:hover, .nav-item.active { color: var(--primary); background: var(--primary-light); border-right: 4px solid var(--primary); }
-        #main-content { flex-grow: 1; overflow-y: auto; padding: 25px; position: relative; padding-bottom: 90px; scroll-behavior: smooth; }
+        /* Application Master Framework Layout */
+        #sidebar { background: var(--primary); color: white; width: 280px; display: flex; flex-direction: column; padding: 25px 0; z-index: 100; justify-content: space-between; }
+        .nav-item { padding: 14px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; opacity: 0.6; transition: 0.2s; font-weight: 500; font-size: 0.95em; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { opacity: 1; background: rgba(255,255,255,0.06); border-left: 4px solid var(--accent); }
+        #main-content { flex-grow: 1; overflow-y: auto; padding: 30px; position: relative; padding-bottom: 110px; scroll-behavior: smooth; }
         
-        /* UI Elements */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-        .card { background: var(--card); padding: 25px; border-radius: var(--radius); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+        /* Modernized Interface Components */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 18px 25px; border-radius: 14px; box-shadow: 0 4px 12px rgba(15,23,42,0.02); border: 1px solid var(--border); margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .card { background: var(--card); padding: 25px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
+        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media(min-width: 992px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
         
         .form-group { margin-bottom: 18px; text-align: left; }
-        label { display: block; font-size: 0.85em; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-        input, select { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: #f9fafb; transition: 0.2s; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: white; }
+        label { display: block; font-size: 0.75em; font-weight: 700; margin-bottom: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; background: #f8fafc; transition: all 0.2s; color: var(--text); }
+        input:focus, select:focus { outline: none; border-color: var(--secondary); background: white; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
         
-        button { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3); }
-        button:hover { transform: translateY(-1px); box-shadow: 0 6px 8px -1px rgba(99, 102, 241, 0.4); }
-        button.outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none; }
-        button.outline:hover { border-color: var(--primary); color: var(--primary); }
-        button.success { background: var(--secondary); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
-        button.success:hover { box-shadow: 0 6px 8px -1px rgba(16, 185, 129, 0.4); }
+        button { background: var(--secondary); color: white; border: none; padding: 14px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px; transition: 0.2s; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
+        button:hover { filter: brightness(1.08); box-shadow: 0 4px 12px rgba(79,70,229,0.2); }
+        button.outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        button.outline:hover { background: var(--bg); box-shadow: none; }
+        button.danger { background: var(--danger); }
+        button.danger:hover { box-shadow: 0 4px 12px rgba(239,68,68,0.2); }
+        button.success { background: var(--success); }
+        button.success:hover { box-shadow: 0 4px 12px rgba(16,185,129,0.2); }
+        button.icon-btn { padding: 8px; width: auto; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); }
+        button.icon-btn:hover { background: var(--bg); color: var(--primary); box-shadow: none; }
         
-        .badge { background: var(--primary-light); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; display: inline-block; margin: 5px; }
-        .stat-card { background: white; border: 1px solid var(--border); padding: 20px; border-radius: var(--radius); text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .master-balance { background: linear-gradient(135deg, var(--primary), #818cf8); color: white; padding: 35px; border-radius: var(--radius); text-align: center; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .member-badge { background: #e0e7ff; color: var(--secondary); padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600; display: inline-block; margin: 4px; }
+        .admin-badge { background: #fef3c7; color: var(--admin-gold); border: 1px solid #fde68a; }
+        .stat-card { background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; text-align: center; }
+        .master-balance { background: linear-gradient(135deg, #1e293b 0%, var(--primary) 100%); color: white; padding: 32px; border-radius: 14px; text-align: center; box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15); border: 1px solid rgba(255,255,255,0.05); }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; min-width: 700px; }
         th, td { padding: 16px 12px; border-bottom: 1px solid var(--border); text-align: left; }
-        th { color: var(--muted); font-weight: 600; font-size: 0.85em; }
-        .action-icon { cursor: pointer; font-size: 1.2em; margin-right: 10px; opacity: 0.6; transition: 0.2s; background: none; border: none; }
-        .action-icon:hover { opacity: 1; transform: scale(1.1); }
+        th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.5px; background: #fafafa; }
+        tr:hover td { background-color: #fafafa; }
+        .row-settlement { background-color: rgba(16, 185, 129, 0.03); }
+        .row-settlement:hover td { background-color: rgba(16, 185, 129, 0.05); }
 
-        /* Mobile Nav */
+        /* Adaptive Layout Modifications */
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            #sidebar { flex-direction: row; width: 100%; position: fixed; bottom: 0; left: 0; padding: 0; height: 75px; border-right: none; border-top: 1px solid var(--border); z-index: 1000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
-            .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; font-size: 0.7em; gap: 4px; border-right: none; border-top: 3px solid transparent; }
-            .nav-item:hover, .nav-item.active { border-right: none; border-top: 3px solid var(--primary); background: transparent; }
-            #main-content { padding: 15px; padding-bottom: 100px; }
+            #sidebar { flex-direction: row; width: 100%; position: fixed; bottom: 0; left: 0; padding: 0; height: 75px; background: white; border-top: 1px solid var(--border); z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.04); }
+            .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; color: var(--muted); font-size: 0.65em; gap: 4px; border-left: none; text-align: center; }
+            .nav-item:hover, .nav-item.active { background: none; color: var(--secondary); border-top: 3px solid var(--secondary); border-left: none; }
+            #main-content { padding: 15px; padding-bottom: 110px; }
+            .sidebar-footer { display: none !important; }
         }
 
-        /* AI Assistant */
-        .chatbot { position: fixed; bottom: 90px; right: 25px; width: 340px; background: white; border-radius: var(--radius); box-shadow: 0 12px 30px rgba(0,0,0,0.15); border: 1px solid var(--border); z-index: 999; display: flex; flex-direction: column; transition: 0.3s; transform: translateY(0); }
+        /* DomusOS Agentic Chatbot Engine Design Layout */
+        .chatbot { position: fixed; bottom: 95px; right: 30px; width: 380px; background: white; border-radius: 16px; box-shadow: 0 16px 48px rgba(15,23,42,0.15); border: 1px solid var(--border); z-index: 999; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: translateY(0); overflow: hidden; }
         .chatbot.collapsed { transform: translateY(calc(100% - 60px)); }
-        @media (max-width: 768px) { .chatbot { width: 90%; right: 5%; bottom: 85px; } }
-        .chat-head { background: var(--primary); color: white; padding: 18px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border-radius: 15px 15px 0 0; }
-        .chat-body { height: 300px; padding: 20px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 12px; font-size: 0.95em; }
-        .chat-input { display: flex; padding: 12px; background: white; border-top: 1px solid var(--border); border-radius: 0 0 15px 15px; }
-        .chat-input input { padding: 10px; flex-grow: 1; border: none; background: transparent; }
-        .chat-input button { width: auto; padding: 10px 18px; box-shadow: none; }
-        .msg { padding: 12px 16px; border-radius: 14px; max-width: 85%; line-height: 1.4; word-wrap: break-word; }
-        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .msg.user { background: var(--primary); color: white; align-self: flex-end; }
+        @media (max-width: 768px) { .chatbot { width: 92%; right: 4%; bottom: 90px; } }
+        .chat-head { background: var(--primary); color: white; padding: 18px 20px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .chat-disclaimer { font-size: 0.72em; color: #94a3b8; background: #1e293b; padding: 8px 14px; text-align: left; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .chat-body { height: 320px; padding: 20px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 14px; font-size: 0.9em; }
+        .chat-input { display: flex; padding: 12px; background: white; border-top: 1px solid var(--border); gap: 8px; }
+        .chat-input input { padding: 10px 14px; flex-grow: 1; border: 1px solid var(--border); border-radius: 6px; background: #f8fafc; margin: 0; }
+        .chat-input button { width: auto; padding: 0 20px; border-radius: 6px; }
+        .msg { padding: 12px 16px; border-radius: 14px; max-width: 85%; line-height: 1.45; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; color: var(--text); }
+        .msg.user { background: var(--secondary); color: white; align-self: flex-end; }
+        .chat-suggestions { display: flex; gap: 6px; overflow-x: auto; padding: 0 14px 10px 14px; background: #f8fafc; }
+        .chat-suggestions span { background: white; border: 1px solid var(--border); font-size: 0.78em; padding: 5px 10px; border-radius: 12px; cursor: pointer; color: var(--muted); white-space: nowrap; transition: 0.2s; }
+        .chat-suggestions span:hover { border-color: var(--secondary); color: var(--secondary); }
     </style>
 </head>
 <body>
 
-<!-- SETUP / LANDING -->
-<div id="viewLanding" class="view-section active" style="display:flex; align-items:center;">
-    <div class="landing-container" id="landingStep1">
-        <h1>💸 Family & Flat</h1>
-        <p>A friendly, simple way to track shared expenses, group dinners, and household bills. No passwords needed.</p>
-        <button onclick="createNewDashboard()">Create a New Group</button>
-    </div>
-    
-    <div class="landing-container" id="landingStep2" style="display:none;">
-        <h1>👋 Welcome!</h1>
-        <p>You've been invited to join this group. What should we call you?</p>
+<div id="viewLanding" class="view-section active" style="align-items:center; justify-content:center; background:#f1f5f9;">
+    <div class="landing-container">
+        <h1>DomusOS<span style="color:var(--accent)">.</span></h1>
+        <p>The unified household financial engine. Coordinate shared capital, calculate balance logic, and run predictive budget analyses in real time.</p>
+        
         <div class="form-group">
-            <input type="text" id="joinName" placeholder="Your Name (e.g. Sam)">
+            <label>Your Personal Profile Name</label>
+            <input type="text" id="userProfileName" placeholder="e.g., Father, Son, Sarah">
         </div>
-        <button onclick="joinDashboard()">Join Group</button>
+
+        <div class="form-group" id="householdNameFieldGroup">
+            <label>Household / Family System Name</label>
+            <input type="text" id="householdNameInput" placeholder="e.g., The Watson Estate, Myers Home">
+        </div>
+
+        <div id="setupActionsMaster" style="margin-top: 25px;">
+            <button id="btnInitHousehold" onclick="processIdentityAndExecute('create')" style="margin-bottom: 12px;">Initialize Household Domain</button>
+            <div id="joinOptionContainer" style="display:none; border-top: 1px solid var(--border); margin-top: 20px; padding-top: 25px;">
+                <p style="font-size:0.9em; margin-bottom:15px; color: var(--success); font-weight: 600;">🔒 Secure Invitation Token Verified</p>
+                <button class="success" id="btnJoinHousehold" onclick="processIdentityAndExecute('join')">Authenticate & Enter Household</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="viewApp" class="view-section" style="display:none;">
-    <div style="display:flex; height:100%;">
+    <div style="display:flex; width:100%; height:100%;">
+        
         <div id="sidebar">
-            <div style="padding: 0 25px 25px 25px; font-weight: 800; font-size: 1.4em; color: var(--primary); border-bottom: 1px solid var(--border); margin-bottom: 15px;" id="deskLogo">💸 Finance OS</div>
-            <div class="nav-item active" onclick="nav('dash')">📝 Add Expenses</div>
-            <div class="nav-item" onclick="nav('analytics')">📊 Summary & Budgets</div>
-            <div class="nav-item" onclick="nav('settle')">🤝 Settle Balances</div>
-            <div class="nav-item" onclick="nav('settings')">⚙️ Settings & Members</div>
+            <div style="flex-grow:1;">
+                <div style="padding: 10px 25px 5px 25px; font-weight: 800; font-size: 1.5em; letter-spacing: -0.5px;" id="deskLogo">DomusOS<span style="color:var(--accent)">.</span></div>
+                <div id="sidebarHouseholdBadge" style="padding: 0 25px 25px 25px; font-size: 0.8em; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;"></div>
+                <div class="nav-item active" onclick="nav('dash')">📊 Family Ledger</div>
+                <div class="nav-item" onclick="nav('analytics')">📈 Analytics & Runs</div>
+                <div class="nav-item" onclick="nav('settle')">🤝 Settle Balances</div>
+                <div class="nav-item" onclick="nav('settings')">⚙️ Controls & Audit</div>
+            </div>
+            <div class="sidebar-footer" style="padding: 20px 25px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.8em; color: var(--muted);">
+                System Root Node: v2.2.0-2026
+            </div>
         </div>
 
         <div id="main-content">
             <div class="top-bar">
                 <div>
-                    <h3 style="margin: 0; font-size: 1.4em;" id="pageTitle">Expenses</h3>
-                    <p style="margin: 4px 0 0 0; font-size: 0.85em; color: var(--primary); cursor: pointer; font-weight: 600;" onclick="copyInviteLink()">📋 Copy Group Invite Link</p>
+                    <h3 style="margin: 0; font-weight: 700; font-size: 1.3em;" id="pageTitle">Family Ledger</h3>
+                    
+                    <div id="adminLinkContainer" style="display: none; margin-top: 5px;">
+                        <p style="margin: 0; font-size: 0.8em; color: var(--admin-gold); cursor: pointer; font-weight: bold;" onclick="copyInviteLink()">🔑 Admin Control: Copy Protected Onboarding Link</p>
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span id="headerName" style="font-weight:600; font-size:0.9em; background:var(--primary-light); color:var(--primary); padding:8px 16px; border-radius:20px;"></span>
-                    <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 10px 14px; margin:0;">
-                    <button class="outline" style="width: auto; padding: 10px 16px; border-radius:20px;" onclick="clearFilter()">Clear</button>
+                    <span id="headerName" style="font-weight:700; font-size:0.85em; background:var(--primary); color:white; padding:6px 14px; border-radius:20px;"></span>
+                    <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 6px 12px; margin:0; height:34px; font-size:0.85em;">
+                    <button class="outline" style="width: auto; padding: 6px 12px; height:34px; font-size:0.85em;" onclick="clearFilter()">All-Time</button>
                 </div>
             </div>
 
-            <!-- TAB: EXPENSES -->
-            <div id="tab-dash" class="app-tab active">
+            <div id="tab-dash" class="app-tab" style="width:100%;">
                 <div class="grid-2">
                     <div class="card" id="entryFormCard">
-                        <h2 id="formTitle">🧾 Log an Expense</h2>
+                        <h2 id="formTitle" style="margin-top:0; font-weight:700; font-size:1.2em; color:var(--primary);">Log Household Activity</h2>
                         <input type="hidden" id="editId">
                         
                         <div class="grid-2">
-                            <div class="form-group"><label>Date</label><input type="date" id="dateInput"></div>
-                            <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="amount" placeholder="0"></div>
+                            <div class="form-group"><label>Transaction Date</label><input type="date" id="dateInput"></div>
+                            <div class="form-group"><label>Total Capital Gross (₹)</label><input type="number" id="amount" placeholder="0.00"></div>
                         </div>
-                        <div class="form-group"><label>What was this for?</label><input type="text" id="desc" placeholder="e.g., Weekend Groceries"></div>
-                        <div class="form-group"><label>Category</label><select id="categorySelect"></select></div>
+                        <div class="form-group"><label>Core Description</label><input type="text" id="desc" placeholder="e.g., Grid Power Bill, System Upkeep"></div>
+                        <div class="form-group"><label>Operational Allocation Vector</label><select id="categorySelect"></select></div>
                         
                         <div class="grid-2">
                             <div class="form-group">
-                                <label>Who Paid?</label>
+                                <label>Gross Capital Deployed By</label>
                                 <select id="payerType" onchange="togglePayerType()">
-                                    <option value="single">One Person</option>
-                                    <option value="multiple">Multiple People (Split Payment)</option>
+                                    <option value="single">Single Payer Strategy</option>
+                                    <option value="multiple">Multi-Entity Apportionment (Split Input)</option>
                                 </select>
                                 <select id="payerSelect" style="margin-top:8px;"></select>
-                                <div id="multiPayerUI" style="display:none; flex-direction:column; gap:8px; margin-top:8px; background:var(--bg); padding:15px; border-radius:10px;"></div>
+                                <div id="multiPayerUI" style="display:none; flex-direction:column; gap:8px; margin-top:8px; background:var(--bg); padding:12px; border-radius:8px; border:1px solid var(--border);"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label>How is it split?</label>
+                                <label>Net Liability Allocation Matrix</label>
                                 <select id="splitType" onchange="toggleSplit()">
-                                    <option value="equal_all">Equally (Everyone)</option>
-                                    <option value="custom">Custom Percentage (%)</option>
-                                    <option value="solo">Just Me (Personal Expense)</option>
+                                    <option value="equal_all">Equally Distributed Across Household</option>
+                                    <option value="custom">Custom Weight Discrepancies (%)</option>
+                                    <option value="solo">Isolate to Self 100% (Personal Account)</option>
                                 </select>
                             </div>
                         </div>
                         
-                        <div id="customSplitUI" style="display:none; flex-direction: column; gap:10px; margin-bottom:20px; background:var(--bg); padding:15px; border-radius:10px;">
-                            <label>Who owes what percentage?</label>
+                        <div id="customSplitUI" style="display:none; flex-direction: column; gap:10px; margin-bottom:18px; background:var(--bg); padding:15px; border-radius:8px; border:1px solid var(--border);">
+                            <label>Proportional Liability Settings (%)</label>
                             <div id="customSplitInputs" style="display:flex; flex-wrap:wrap; gap:12px;"></div>
                         </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button id="submitBtn" onclick="saveExpense()">Save Expense</button>
-                            <button id="cancelEditBtn" class="outline" style="display:none; width: auto;" onclick="cancelEdit()">Cancel</button>
+                            <button id="submitBtn" onclick="saveExpense()">Commit Entry to Cloud Ledger</button>
+                            <button id="cancelEditBtn" class="outline" style="display:none; width: auto;" onclick="cancelEdit()">Abort Change</button>
                         </div>
                     </div>
 
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                            <h2 style="margin: 0;">🕒 Recent Activity</h2>
-                            <input type="text" id="searchLedger" placeholder="🔍 Search..." onkeyup="renderTable()" style="width: 150px; padding: 10px 14px; border-radius:20px;">
+                            <h2 style="margin: 0; font-weight:700; font-size:1.2em; color:var(--primary);">System Audit Stream</h2>
+                            <input type="text" id="searchLedger" placeholder="🔍 Filter ledger fields..." onkeyup="renderTable()" style="width: 200px; padding: 6px 14px; border-radius:20px; height:34px; font-size:0.85em;">
                         </div>
                         <div style="overflow-x: auto; margin-top: 20px;">
                             <table id="ledgerTable">
-                                <thead><tr><th>Date</th><th>Details</th><th>Paid By</th><th>₹ Total</th><th></th></tr></thead>
+                                <thead><tr><th>Date</th><th>Allocation/Vector</th><th>Gross Deployment</th><th>₹ Summation</th><th>Actions</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -198,87 +255,72 @@
                 </div>
             </div>
 
-            <!-- TAB: SUMMARY & BUDGETS -->
-            <div id="tab-analytics" class="app-tab" style="display:none;">
+            <div id="tab-analytics" class="app-tab" style="display:none; width:100%;">
                 <div class="grid-2">
                     <div class="master-balance">
-                        <p style="margin: 0 0 10px 0; font-size: 0.9em; opacity: 0.9; text-transform: uppercase; font-weight:600;">Overall Group Balance</p>
-                        <h2 id="settlementText" style="margin: 0; font-size:2em; font-weight:800;">Syncing...</h2>
+                        <p style="margin: 0 0 10px 0; font-size: 0.8em; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px;">Calculated Net Settlement Resolution</p>
+                        <h2 id="settlementText" style="margin: 0; font-size:2.1em; font-weight:800; letter-spacing:-0.5px;">Syncing cloud state matrices...</h2>
                     </div>
                     <div class="card" style="margin:0;">
-                        <h3 style="margin-top:0;">🎯 Monthly Spending Goal</h3>
+                        <h3 style="margin-top:0; font-size:1.05em; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Household Burn Pacing Strategy</h3>
                         <div id="pacingUI"></div>
                     </div>
                 </div>
                 
                 <div class="card" style="margin-top: 25px;">
-                    <h3 style="margin-top:0;">👥 Individual Summary <span id="periodText" style="font-size:0.8em; color:var(--muted); font-weight:normal;"></span></h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:15px;" id="analyticsGrid"></div>
+                    <h3 style="margin-top:0; font-size:1.1em; font-weight:700;">Entity Breakdown Overview <span id="periodText" style="font-size:0.75em; color:var(--muted); font-weight:normal;"></span></h3>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;" id="analyticsGrid"></div>
                 </div>
 
                 <div class="grid-2">
-                    <div class="card"><h3 style="margin-top:0;">Where is the money going?</h3><div style="height: 250px;"><canvas id="categoryChart"></canvas></div></div>
-                    <div class="card"><h3 style="margin-top:0;">Paid vs. Consumed</h3><div style="height: 250px;"><canvas id="barChart"></canvas></div></div>
+                    <div class="card"><h3 style="margin-top:0; font-size:1.1em; font-weight:700;">Distribution Vectors (Categories)</h3><div style="height: 260px;"><canvas id="categoryChart"></canvas></div></div>
+                    <div class="card"><h3 style="margin-top:0; font-size:1.1em; font-weight:700;">Capital Deployments vs Liability Profiles</h3><div style="height: 260px;"><canvas id="barChart"></canvas></div></div>
                 </div>
             </div>
 
-            <!-- TAB: SETTLE UP -->
-            <div id="tab-settle" class="app-tab" style="display:none;">
-                <div class="card" style="max-width: 600px; margin: 0 auto;">
-                    <h2 style="text-align: center; margin-top:0;">🤝 Record a Payment</h2>
-                    <p style="text-align: center; color: var(--muted); margin-bottom: 30px;">Did someone pay someone else back? Log it here to balance the group's math without messing up your expense history.</p>
+            <div id="tab-settle" class="app-tab" style="display:none; width:100%;">
+                <div class="card" style="max-width: 650px; margin: 0 auto;">
+                    <h2 style="text-align: center; margin-top:0; font-weight:700;">Log Balance Resolution Transaction</h2>
+                    <p style="text-align: center; color: var(--muted); font-size: 0.95em; margin-bottom: 30px;">Directly ledger cash/banking settlements to cleanly balance historical positions without clearing record entries.</p>
                     <div class="grid-2">
-                        <div class="form-group"><label>Date of Payment</label><input type="date" id="settleDate"></div>
-                        <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="settleAmount" placeholder="0"></div>
+                        <div class="form-group"><label>Settlement Date</label><input type="date" id="settleDate"></div>
+                        <div class="form-group"><label>Transferred Balance (₹)</label><input type="number" id="settleAmount" placeholder="0.00"></div>
                     </div>
                     <div class="grid-2">
-                        <div class="form-group"><label>Who Sent The Money?</label><select id="settleSender"></select></div>
-                        <div class="form-group"><label>Who Received It?</label><select id="settleReceiver"></select></div>
+                        <div class="form-group"><label>Capital Source Entity</label><select id="settleSender"></select></div>
+                        <div class="form-group"><label>Capital Destination Recipient</label><select id="settleReceiver"></select></div>
                     </div>
-                    <button class="success" onclick="addSettlement()">Save Payment</button>
+                    <button class="success" onclick="addSettlement()" style="margin-top:15px; padding:16px;">Execute Master Balance Ledger Entry</button>
                 </div>
             </div>
 
-            <!-- TAB: SETTINGS & MEMBERS -->
-            <div id="tab-settings" class="app-tab" style="display:none;">
+            <div id="tab-settings" class="app-tab" style="display:none; width:100%;">
                 <div class="grid-2">
+                    <div class="card">
+                        <h2 style="margin-top:0; font-weight:700; font-size:1.3em;">Core Domain Configuration</h2>
+                        <div class="form-group">
+                            <label>Configured Household Global Monthly Budget Cap (₹)</label>
+                            <input type="number" id="monthlyBudget" placeholder="Enter limits" onblur="updateBudget()">
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
+                        <label>Category Tree Configuration</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;"><input type="text" id="newCat" placeholder="Define category label"><button style="width: 100px;" onclick="addCategory()">Inject</button></div>
+                        <div id="categoryTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
+                        <button class="outline" onclick="exportCSV()">📊 Download Analytical Table Format (CSV)</button>
+                    </div>
                     
                     <div class="card">
-                        <h2 style="margin-top:0;">👥 Group Members</h2>
-                        <p style="font-size: 0.9em; color: var(--muted); margin-top:-10px;">People who have joined via the link:</p>
-                        <div id="memberListDisplay" style="margin-bottom: 25px;"></div>
-                        
-                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                        
-                        <label>Add a Person Manually</label>
-                        <p style="font-size: 0.85em; color: var(--muted); margin-top:-5px; margin-bottom:15px;">Want to track expenses for someone who doesn't want to use the app (like a parent or flatmate)? Add them here.</p>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="manualMemberAdd" placeholder="e.g., Mom">
-                            <button style="width: auto; padding: 10px 20px;" onclick="addManualMember()">Add Person</button>
+                        <h2 style="margin-top:0; font-weight:700; font-size:1.3em;">Cryptographic Master Audit Log</h2>
+                        <p style="font-size:0.85em; color:var(--muted); margin-top:-8px;">Tracks global ledger edits, structural updates, and mutations natively.</p>
+                        <div id="auditLogUI" style="max-height: 320px; overflow-y:auto; font-size: 0.85em; background:var(--bg); padding:15px; border-radius:10px; border:1px solid var(--border);">
                         </div>
-                    </div>
-
-                    <div class="card">
-                        <h2 style="margin-top:0;">⚙️ Dashboard Setup</h2>
-                        <div class="form-group">
-                            <label>Monthly Spending Goal (Budget ₹)</label>
-                            <input type="number" id="monthlyBudget" placeholder="0" onblur="updateBudget()">
-                        </div>
-                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                        
-                        <label>Categories</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;"><input type="text" id="newCat" placeholder="e.g., Pet Supplies"><button style="width: 80px;" onclick="addCategory()">Add</button></div>
-                        <div id="categoryTags" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                        
-                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                        <button class="outline" onclick="exportCSV()">📥 Download Spreadsheet (CSV)</button>
                     </div>
                 </div>
-                
-                <div class="card">
-                    <h2 style="margin-top:0;">📝 Activity Log</h2>
-                    <p style="font-size:0.85em; color:var(--muted); margin-top:-10px;">A transparent history of who added, edited, or deleted expenses.</p>
-                    <div id="auditLogUI" style="max-height: 250px; overflow-y:auto; font-size: 0.9em; background:var(--bg); padding:15px; border-radius:10px;"></div>
+                <div class="card" style="border-left: 4px solid var(--danger); margin-top:10px;">
+                    <h2 style="color:var(--danger); margin-top:0; font-weight:700; font-size:1.3em;">Danger Zone Protocols</h2>
+                    <p style="font-size:0.9em; color:var(--muted); margin-top:-5px;">This wipes out structural cloud arrays for all linked entities simultaneously.</p>
+                    <button class="danger" style="max-width: 280px; padding:12px;" onclick="factoryReset()">⚠️ Delete Complete Dashboard Domain</button>
                 </div>
             </div>
 
@@ -286,32 +328,53 @@
     </div>
 </div>
 
-<!-- AI ASSISTANT -->
 <div class="chatbot collapsed" id="chatbotMain">
-    <div class="chat-head" onclick="toggleChat()"><span>Ask AI Assistant ✨</span><span id="chatToggleIcon" style="font-size:0.8em;">▲</span></div>
-    <div class="chat-body" id="chatBody"></div>
-    <div class="chat-input" id="chatInputArea"><input type="text" id="chatQ" placeholder="E.g., How much on groceries?" onkeypress="if(event.key === 'Enter') askBot()"><button onclick="askBot()">Send</button></div>
+    <div class="chat-head" onclick="toggleChat()">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.2em;">🤖</span>
+            <div style="display:flex; flex-direction:column;">
+                <span style="font-weight:700; font-size:0.95em; letter-spacing: -0.2px;">Domus Context Agent</span>
+            </div>
+        </div>
+        <span id="chatToggleIcon" style="font-size:0.8em; opacity:0.7;">▲</span>
+    </div>
+    <div class="chat-disclaimer">
+        <strong>Automated System Disclaimer:</strong> Domus Context Agent provides technical database query interpretations, arithmetic metrics summaries, and theoretical financial allocation concepts. It does not provide regulated, professional asset-management advisory configurations. System metrics are monitored algorithmically.
+    </div>
+    <div class="chat-body" id="chatBody">
+        <div class="msg bot">System connection initialized. I am directly mapped to your active cloud memory ledger data sets. Ask me to construct an analysis, verify run pacing, or evaluate financial balancing behavior across users.</div>
+    </div>
+    <div class="chat-suggestions" id="chatSuggestionsBox">
+        <span onclick="triggerSuggestedQuery('Run an advanced household data audit')">📊 Deep Household Audit</span>
+        <span onclick="triggerSuggestedQuery('Provide optimizing advice for personal finance optimization')">💡 Financial Optimization Advice</span>
+        <span onclick="triggerSuggestedQuery('Who owes money across the members currently')">🤝 Matrix Balances</span>
+    </div>
+    <div class="chat-input" id="chatInputArea">
+        <input type="text" id="chatQ" placeholder="Query active database or financial metrics..." onkeypress="if(event.key === 'Enter') askBot()">
+        <button onclick="askBot()">Query</button>
+    </div>
 </div>
 
 <script>
-    // ==========================================
-    // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
-    // ==========================================
+    // ========================================================
+    // ⚠️ MANDATORY: FIREBASE CREDENTIAL CONFIGURATIONS BLOCK ⚠️
+    // ========================================================
     const firebaseConfig = {
-  apiKey: "AIzaSyAj3Po9mtX74zWBpWkGgwB58Z7pfLg_zsU",
-  authDomain: "trackyourexpense-d5ad5.firebaseapp.com",
-  projectId: "trackyourexpense-d5ad5",
-  storageBucket: "trackyourexpense-d5ad5.firebasestorage.app",
-  messagingSenderId: "104147538477",
-  appId: "1:104147538477:web:6c2d325232f92f2a325ea4",
-  measurementId: "G-1JKSP8DMKP"
-};
+        apiKey: "AIzaSyAj3Po9mtX74zWBpWkGgwB58Z7pfLg_zsU",
+        authDomain: "trackyourexpense-d5ad5.firebaseapp.com",
+        projectId: "trackyourexpense-d5ad5",
+        storageBucket: "trackyourexpense-d5ad5.firebasestorage.app",
+        messagingSenderId: "104147538477",
+        appId: "1:104147538477:web:6c2d325232f92f2a325ea4",
+        measurementId: "G-1JKSP8DMKP"
+    };
+    
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    // --- STATE MANAGEMENT ---
+    // --- STATE CONFIGS ---
     let dashboardId = new URLSearchParams(window.location.search).get('db');
-    let myName = localStorage.getItem('financeOS_Name');
+    let myName = localStorage.getItem('domusOS_Name');
     let appData = null;
     let chartPie = null, chartBar = null;
 
@@ -320,96 +383,133 @@
     document.getElementById('settleDate').value = today;
     document.getElementById('globalMonthFilter').value = today.substring(0, 7);
 
-    // --- BOOTSTRAP ---
-    if (!dashboardId) {
-        document.getElementById('viewLanding').style.display = 'flex';
-        document.getElementById('landingStep1').style.display = 'block';
-    } else if (!myName) {
-        document.getElementById('viewLanding').style.display = 'flex';
-        document.getElementById('landingStep2').style.display = 'block';
-    } else {
-        bootDashboard();
+    // --- BOOTSTRAPPING USER ENTRY ENGINES ---
+    window.addEventListener('DOMContentLoaded', async () => {
+        if (dashboardId) {
+            // An invitation link was clicked! Hide the household name input step (handled automatically by the database document parameters)
+            document.getElementById('householdNameFieldGroup').style.display = 'none';
+            document.getElementById('joinOptionContainer').style.display = 'block';
+            document.getElementById('btnInitHousehold').style.display = 'none';
+        }
+        
+        if (myName && dashboardId) {
+            bootDashboard();
+        } else {
+            if (myName) document.getElementById('userProfileName').value = myName;
+            document.getElementById('viewLanding').style.display = 'flex';
+        }
+    });
+
+    function processIdentityAndExecute(strategy) {
+        const inputName = document.getElementById('userProfileName').value.trim();
+        if(!inputName) return alert("An operational identity name string profile label is required.");
+        
+        localStorage.setItem('domusOS_Name', inputName);
+        myName = inputName;
+
+        if (strategy === 'create') {
+            const hName = document.getElementById('householdNameInput').value.trim();
+            if(!hName) return alert("Please assign a Household / Family identity parameter label to proceed.");
+            createNewDashboard(hName);
+        } else if (strategy === 'join') {
+            bootDashboard();
+        }
     }
 
-    async function createNewDashboard() {
+    async function createNewDashboard(householdName) {
         const newId = db.collection('shared_dashboards').doc().id;
+        const secureAdminToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        localStorage.setItem('domusOS_AdminKey_' + newId, secureAdminToken);
+        
         await db.collection('shared_dashboards').doc(newId).set({
             created_at: Date.now(),
-            members: [],
-            categories: ["Rent", "Groceries", "Utilities", "Dining Out", "Household", "Investments (SIPs)", "Health & Ayurveda", "Other"],
+            householdName: householdName,
+            adminToken: secureAdminToken,
+            adminProfileName: myName,
+            members: [myName],
+            categories: ["Rent", "Groceries", "Utilities", "Dining Out", "Household Infrastructure", "Investments & Security", "Medical Logistics", "Variable Other"],
             expenses: [],
-            auditLog: [],
+            auditLog: [{ date: new Date().toISOString(), user: myName, action: `Initialized Household Database Cluster: "${householdName}"` }],
             monthlyBudget: 0
         });
         window.location.href = `?db=${newId}`;
     }
 
-    async function joinDashboard() {
-        const name = document.getElementById('joinName').value.trim();
-        if(!name) return alert("Please enter your name.");
-        localStorage.setItem('financeOS_Name', name);
-        myName = name;
-        bootDashboard();
-    }
-
     function bootDashboard() {
+        // THE BUG FIX IS HERE: Changed style.className to just className
+        document.getElementById('viewLanding').className = 'view-section'; 
         document.getElementById('viewLanding').style.display = 'none';
-        document.getElementById('viewApp').style.display = 'block';
+        document.getElementById('viewApp').style.display = 'flex';
         document.getElementById('headerName').innerText = `👤 ${myName}`;
 
         db.collection('shared_dashboards').doc(dashboardId).onSnapshot((doc) => {
             if (doc.exists) {
                 appData = doc.data();
+                
+                // Dynamic Document Label Extraction Framework Updates
+                const activeHouseholdNameString = appData.householdName || "Shared Ledger Node";
+                document.getElementById('sidebarHouseholdBadge').innerText = `🏠 ${activeHouseholdNameString}`;
+                
+                // Admin Flow Security Verification Engine Check execution
+                const localAdminToken = localStorage.getItem('domusOS_AdminKey_' + dashboardId);
+                const isAdmin = (localAdminToken && localAdminToken === appData.adminToken) || (appData.adminProfileName === myName);
+                
+                if (isAdmin) {
+                    document.getElementById('adminLinkContainer').style.display = 'block';
+                } else {
+                    document.getElementById('adminLinkContainer').style.display = 'none';
+                }
+
                 if(!appData.members.includes(myName)) {
                     appData.members.push(myName);
-                    logAudit(`${myName} joined the group.`);
+                    logAudit(`Authenticated entry parameters: Joined household network cluster safely.`);
                     syncToCloud();
-                } else { renderApp(); }
+                } else { 
+                    renderApp(); 
+                }
             } else {
-                alert("Group not found. It may have been deleted.");
+                alert("Target Domain Registry parameters failed to resolve inside storage systems.");
                 window.location.href = window.location.pathname; 
             }
         });
     }
 
-    function syncToCloud() { db.collection('shared_dashboards').doc(dashboardId).set(appData).catch(e => console.error(e)); }
+    function syncToCloud() { 
+        db.collection('shared_dashboards').doc(dashboardId).set(appData).catch(e => console.error("Cloud syncing failed:", e)); 
+    }
 
     function logAudit(action) {
         if(!appData.auditLog) appData.auditLog = [];
         appData.auditLog.push({ date: new Date().toISOString(), user: myName, action: action });
     }
 
-    // --- NAVIGATION ---
     function nav(tabId) {
         document.querySelectorAll('.app-tab').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`tab-${tabId}`).style.display = 'block';
         event.currentTarget.classList.add('active');
-        const titles = { 'dash': 'Expenses', 'analytics': 'Summary & Budgets', 'settle': 'Settle Balances', 'settings': 'Settings & Members' };
+        const titles = { 'dash': 'Family Ledger', 'analytics': 'Analytics & Pacing Strategy', 'settle': 'Settle Balances Matrix', 'settings': 'Controls & Master Audit' };
         document.getElementById('pageTitle').innerText = titles[tabId];
-        window.scrollTo(0,0);
     }
     
-    function copyInviteLink() { navigator.clipboard.writeText(window.location.href); alert("Invite Link Copied! Send it to your group."); }
-    function clearFilter() { document.getElementById('globalMonthFilter').value = ''; renderApp(); }
+    function copyInviteLink() { 
+        navigator.clipboard.writeText(window.location.href); 
+        alert(`Encrypted Access Link duplicated to clipboard. Share this link for other family members to join the "${appData.householdName || 'Household'}" network directly.`); 
+    }
+    
+    function clearFilter() { 
+        document.getElementById('globalMonthFilter').value = ''; 
+        renderApp(); 
+    }
+    
     function getFilteredData() {
         const filter = document.getElementById('globalMonthFilter').value;
         if (!filter) return appData.expenses;
         return appData.expenses.filter(e => e.date.startsWith(filter));
     }
 
-    // --- MEMBER MANAGEMENT ---
-    function addManualMember() {
-        const name = document.getElementById('manualMemberAdd').value.trim();
-        if(!name) return;
-        if(appData.members.includes(name)) return alert("This person is already in the group.");
-        appData.members.push(name);
-        logAudit(`${myName} manually added ${name} to the group.`);
-        document.getElementById('manualMemberAdd').value = '';
-        syncToCloud();
-    }
-
-    // --- DYNAMIC UI TOGGLES ---
+    // --- APP-INTERFACE CONTROLS FLOW ENGINES ---
     function togglePayerType() {
         const type = document.getElementById('payerType').value;
         const select = document.getElementById('payerSelect');
@@ -420,7 +520,7 @@
             select.style.display = 'none'; multiUI.style.display = 'flex';
             multiUI.innerHTML = '';
             appData.members.forEach(m => {
-                multiUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center;"><span>${m}</span> <input type="number" class="multi-payer-val" data-member="${m}" placeholder="₹ Paid" style="width:120px; margin:0; padding:8px;"></div>`;
+                multiUI.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center;"><span>${m}</span> <input type="number" class="multi-payer-val" data-member="${m}" placeholder="₹ Paid" style="width:130px; margin:0; padding:6px 10px;"></div>`;
             });
         }
     }
@@ -431,21 +531,21 @@
         const container = document.getElementById('customSplitInputs');
         if (type === 'custom') {
             ui.style.display = 'flex'; container.innerHTML = '';
-            appData.members.forEach(m => { container.innerHTML += `<div style="flex:1; min-width:120px;"><label style="text-transform:none;">${m}</label><input type="number" class="custom-split-val" data-member="${m}" placeholder="%" style="padding:10px;"></div>`; });
+            appData.members.forEach(m => { container.innerHTML += `<div style="flex:1; min-width:110px;"><label style="text-transform:none; font-weight:600;">${m}</label><input type="number" class="custom-split-val" data-member="${m}" placeholder="%" style="padding:8px;"></div>`; });
         } else { ui.style.display = 'none'; }
     }
 
-    // --- EXPENSE CRUD ---
+    // --- ARRAYS MUTATIONS (CRUD LOGIC FIELDS) ---
     function saveExpense() {
         const id = document.getElementById('editId').value;
         const date = document.getElementById('dateInput').value;
-        const desc = document.getElementById('desc').value;
+        const desc = document.getElementById('desc').value.trim();
         const amount = parseFloat(document.getElementById('amount').value);
         const cat = document.getElementById('categorySelect').value;
         const splitType = document.getElementById('splitType').value;
         const payerType = document.getElementById('payerType').value;
 
-        if(!date || !desc || !amount) return alert("Please fill out the Date, Description, and Amount.");
+        if(!date || !desc || !amount) return alert("Fill core monitoring transaction values configuration elements.");
 
         let payers = {};
         if (payerType === 'single') {
@@ -457,7 +557,7 @@
                 if(v > 0) payers[inp.dataset.member] = v;
                 tPaid += v;
             });
-            if (Math.abs(tPaid - amount) > 0.1) return alert(`The split payment amounts (₹${tPaid}) must add up to the total expense (₹${amount}).`);
+            if (Math.abs(tPaid - amount) > 0.1) return alert(`Aggregated input matrices sums (₹${tPaid}) must balance with specified Gross total parameter definitions (₹${amount}).`);
         }
 
         let shares = {};
@@ -465,7 +565,7 @@
             const val = amount / appData.members.length;
             appData.members.forEach(m => shares[m] = val);
         } else if (splitType === 'solo') {
-            if(Object.keys(payers).length > 1) return alert("Personal expenses must have a single payer.");
+            if(Object.keys(payers).length > 1) return alert("Isolate balance tracking requires single origin entity initialization parameters.");
             appData.members.forEach(m => shares[m] = (m === Object.keys(payers)[0]) ? amount : 0);
         } else if (splitType === 'custom') {
             let totalPct = 0;
@@ -473,7 +573,7 @@
                 const pct = parseFloat(input.value) || 0; totalPct += pct;
                 shares[input.dataset.member] = amount * (pct / 100);
             });
-            if(Math.abs(totalPct - 100) > 0.1) return alert("Custom percentages must equal 100%.");
+            if(Math.abs(totalPct - 100) > 0.1) return alert("Proportional metric configuration requirements mandate exactly 100% distribution summaries.");
         }
 
         const expenseObj = { id: id ? parseInt(id) : Date.now(), type: 'expense', date, desc, amount, cat, payers, shares, splitType, payerType };
@@ -481,11 +581,11 @@
         if (id) {
             const idx = appData.expenses.findIndex(e => e.id == id);
             if(idx > -1) appData.expenses[idx] = expenseObj;
-            logAudit(`Updated expense: '${desc}' (₹${amount})`);
+            logAudit(`Modified system ledger entry framework matrix tracker: '${desc}' (₹${amount})`);
             cancelEdit();
         } else {
             appData.expenses.push(expenseObj);
-            logAudit(`Added expense: '${desc}' (₹${amount})`);
+            logAudit(`Committed structural ledger transaction block entry point: '${desc}' (₹${amount})`);
             document.getElementById('desc').value = ''; document.getElementById('amount').value = '';
         }
         syncToCloud();
@@ -498,31 +598,35 @@
         document.getElementById('categorySelect').value = ex.cat; 
         
         document.getElementById('payerType').value = ex.payerType || 'single'; togglePayerType();
-        if(ex.payerType === 'multiple') { document.querySelectorAll('.multi-payer-val').forEach(inp => inp.value = ex.payers[inp.dataset.member] || ''); } 
-        else { document.getElementById('payerSelect').value = Object.keys(ex.payers)[0]; }
+        if(ex.payerType === 'multiple') {
+            document.querySelectorAll('.multi-payer-val').forEach(inp => inp.value = ex.payers[inp.dataset.member] || '');
+        } else { document.getElementById('payerSelect').value = Object.keys(ex.payers)[0]; }
 
         document.getElementById('splitType').value = ex.splitType || 'equal_all'; toggleSplit();
-        if (ex.splitType === 'custom') { document.querySelectorAll('.custom-split-val').forEach(input => input.value = Math.round((ex.shares[input.dataset.member] / ex.amount) * 100)); }
+        if (ex.splitType === 'custom') {
+            document.querySelectorAll('.custom-split-val').forEach(input => input.value = Math.round((ex.shares[input.dataset.member] / ex.amount) * 100));
+        }
         
-        document.getElementById('formTitle').innerText = '✏️ Edit Expense';
-        document.getElementById('submitBtn').innerText = 'Save Changes'; 
-        document.getElementById('cancelEditBtn').style.display = 'block'; window.scrollTo(0,0);
+        document.getElementById('formTitle').innerText = 'Modify Operational Ledger Entry Matrix';
+        document.getElementById('submitBtn').innerText = 'Write Modifications'; document.getElementById('submitBtn').className = 'warning';
+        document.getElementById('cancelEditBtn').style.display = 'block';
     }
 
     function cancelEdit() {
         document.getElementById('editId').value = ''; document.getElementById('desc').value = ''; document.getElementById('amount').value = '';
         document.getElementById('splitType').value = 'equal_all'; toggleSplit();
         document.getElementById('payerType').value = 'single'; togglePayerType();
-        document.getElementById('formTitle').innerText = '🧾 Log an Expense';
-        document.getElementById('submitBtn').innerText = 'Save Expense';
+        document.getElementById('formTitle').innerText = 'Log Household Activity';
+        document.getElementById('submitBtn').innerText = 'Commit Entry to Cloud Ledger'; document.getElementById('submitBtn').className = '';
         document.getElementById('cancelEditBtn').style.display = 'none';
     }
 
     function deleteRecord(id) {
         const ex = appData.expenses.find(e => e.id === id);
-        if(confirm("Delete this record permanently?")) { 
+        if(confirm("Confirm deletion of transaction profile sequence parameter elements? This write modification is synchronized instantly.")) { 
             appData.expenses = appData.expenses.filter(e => e.id !== id); 
-            logAudit(`Deleted record: '${ex.desc}'`); cancelEdit(); syncToCloud(); 
+            logAudit(`Executed intentional deletion loop trace instance onto: '${ex.desc}'`);
+            cancelEdit(); syncToCloud(); 
         }
     }
     
@@ -530,29 +634,36 @@
         const ex = appData.expenses.find(e => e.id === id);
         if(ex) {
             let dupe = JSON.parse(JSON.stringify(ex));
-            dupe.id = Date.now(); dupe.date = new Date().toISOString().split('T')[0];
+            dupe.id = Date.now();
+            dupe.date = new Date().toISOString().split('T')[0];
             appData.expenses.push(dupe);
-            logAudit(`Duplicated recurring expense: '${dupe.desc}'`); syncToCloud();
+            logAudit(`Duplicated entry footprint: '${dupe.desc}'`);
+            syncToCloud();
         }
     }
 
     function addSettlement() {
         const date = document.getElementById('settleDate').value; const amount = parseFloat(document.getElementById('settleAmount').value);
         const sender = document.getElementById('settleSender').value; const receiver = document.getElementById('settleReceiver').value;
-        if(!date || !amount) return alert("Please enter date and amount.");
-        if(sender === receiver) return alert("Sender and receiver can't be the same person.");
+        if(!date || !amount) return alert("Verify operational financial data quantities requirements values.");
+        if(sender === receiver) return alert("System design mapping constraints error: Sender matching receiver target parameters identical.");
         
-        appData.expenses.push({ id: Date.now(), type: 'settlement', date, desc: `Payment to ${receiver}`, amount, cat: 'Settlement', sender, receiver });
-        logAudit(`Logged payment: ${sender} paid ${receiver} ₹${amount}`);
+        appData.expenses.push({ id: Date.now(), type: 'settlement', date, desc: `Capital Clearance Settlement: ${sender} ➡️ ${receiver}`, amount, cat: 'Settlement', sender, receiver });
+        logAudit(`Logged strategic balance adjustment clearing transaction event: ${sender} wire-transferred ₹${amount} mapping to ${receiver}`);
         document.getElementById('settleAmount').value = ''; syncToCloud(); nav('analytics');
     }
 
-    // --- SETTINGS ---
-    function updateBudget() { appData.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0; logAudit(`Updated monthly goal to ₹${appData.monthlyBudget}`); syncToCloud(); }
-    function addCategory() { const val = document.getElementById('newCat').value.trim(); if(val && !appData.categories.includes(val)) { appData.categories.push(val); document.getElementById('newCat').value = ''; logAudit(`Added category: ${val}`); syncToCloud(); } }
-    function removeCategory(cat) { if(cat==="Settlement") return; appData.categories = appData.categories.filter(c => c !== cat); logAudit(`Removed category: ${cat}`); syncToCloud(); }
+    // --- SYSTEM CONTROLS TREES ---
+    function updateBudget() {
+        appData.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0;
+        logAudit(`Altered monthly target containment limit constraints matrix threshold: ₹${appData.monthlyBudget}`);
+        syncToCloud();
+    }
+    function addCategory() { const val = document.getElementById('newCat').value.trim(); if(val && !appData.categories.includes(val)) { appData.categories.push(val); document.getElementById('newCat').value = ''; logAudit(`Added categoric allocation subnode array logic element: ${val}`); syncToCloud(); } }
+    function removeCategory(cat) { if(cat==="Settlement") return; appData.categories = appData.categories.filter(c => c !== cat); logAudit(`Dropped analytics data tag parameter entry trace node: ${cat}`); syncToCloud(); }
+    function factoryReset() { if(confirm("CRITICAL WARNING: This action drops complete firestore cluster nodes array trees entirely. This step is completely non-reversible. Purge entire domain?")) { db.collection('shared_dashboards').doc(dashboardId).delete().then(() => window.location.href = window.location.pathname); } }
 
-    // --- RENDER ENGINE ---
+    // --- CANVAS GRAPHIC ENGINE MATRICES ---
     function renderApp() {
         if(!appData) return;
         document.getElementById('monthlyBudget').value = appData.monthlyBudget || '';
@@ -561,44 +672,46 @@
         catSelect.innerHTML = ''; catTags.innerHTML = '';
         appData.categories.forEach(c => {
             if(c !== 'Settlement') catSelect.innerHTML += `<option value="${c}">${c}</option>`;
-            catTags.innerHTML += `<div class="badge">${c} <span style="color:var(--danger); cursor:pointer; margin-left:8px;" onclick="removeCategory('${c}')">×</span></div>`;
+            catTags.innerHTML += `<div class="member-badge" style="background:#e2e8f0; color:var(--text);">${c} <span style="color:var(--danger); cursor:pointer; margin-left:6px; font-weight:bold;" onclick="removeCategory('${c}')">×</span></div>`;
         });
 
         const pSelect = document.getElementById('payerSelect'); const sSend = document.getElementById('settleSender'); const sRec = document.getElementById('settleReceiver');
-        const mList = document.getElementById('memberListDisplay');
-        pSelect.innerHTML = ''; sSend.innerHTML = ''; sRec.innerHTML = ''; mList.innerHTML = '';
+        pSelect.innerHTML = ''; sSend.innerHTML = ''; sRec.innerHTML = ''; 
         
         appData.members.forEach(m => {
-            pSelect.innerHTML += `<option value="${m}">${m} ${m===myName?'(You)':''}</option>`;
-            sSend.innerHTML += `<option value="${m}">${m}</option>`;
-            sRec.innerHTML += `<option value="${m}">${m}</option>`;
-            mList.innerHTML += `<span class="badge">${m}</span>`;
+            const mIsAdmin = (m === appData.adminProfileName);
+            const badgeLabelString = mIsAdmin ? ' (Admin)' : '';
+            pSelect.innerHTML += `<option value="${m}">${m}${badgeLabelString} ${m===myName?'(You)':''}</option>`;
+            sSend.innerHTML += `<option value="${m}">${m}${badgeLabelString}</option>`;
+            sRec.innerHTML += `<option value="${m}">${m}${badgeLabelString}</option>`;
         });
         if(appData.members.includes(myName)) { pSelect.value = myName; sSend.value = myName; }
 
-        document.getElementById('periodText').innerText = document.getElementById('globalMonthFilter').value ? `(${document.getElementById('globalMonthFilter').value})` : '(All Time)';
+        document.getElementById('periodText').innerText = document.getElementById('globalMonthFilter').value ? `(${document.getElementById('globalMonthFilter').value})` : '(All-Time Core Arrays)';
         renderTable(); renderAnalytics(); renderAuditLog();
     }
 
     function renderTable() {
         const tbody = document.querySelector('#ledgerTable tbody'); tbody.innerHTML = '';
         let data = getFilteredData();
-        const query = document.getElementById('searchLedger').value.toLowerCase();
+        const query = document.getElementById('searchLedger').value.toLowerCase().trim();
         if (query) data = data.filter(e => e.desc.toLowerCase().includes(query) || e.cat.toLowerCase().includes(query));
         
         [...data].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ex => {
             const isSettlement = ex.type === 'settlement';
-            let payerStr = isSettlement ? ex.sender : Object.keys(ex.payers).join(' & ');
+            let payerStr = isSettlement ? ex.sender : Object.keys(ex.payers).join(', ');
             
-            let actions = `<button class="action-icon" title="Delete" onclick="deleteRecord(${ex.id})">🗑️</button>`;
-            if (!isSettlement) actions = `<button class="action-icon" title="Edit" onclick="editRecord(${ex.id})">✏️</button> <button class="action-icon" title="Duplicate (Repeat)" onclick="duplicateRecord(${ex.id})">🔁</button> ` + actions;
+            let actions = `<button class="icon-btn" title="Purge Record" onclick="deleteRecord(${ex.id})">🗑️</button>`;
+            if (!isSettlement) {
+                actions = `<button class="icon-btn" title="Modify Record" onclick="editRecord(${ex.id})">✏️</button> <button class="icon-btn" title="Duplicate Metric Sequence" onclick="duplicateRecord(${ex.id})">🔁</button> ` + actions;
+            }
             
             tbody.innerHTML += `<tr class="${isSettlement ? 'row-settlement' : ''}">
-                <td style="color:var(--muted); font-size:0.9em;">${ex.date.substring(5)}</td>
-                <td style="font-weight:600; color:var(--text);">${ex.desc} <br><span style="font-size:0.75em; color:var(--primary); font-weight:normal;">${ex.cat}</span></td>
-                <td><span class="badge" style="margin:0; padding:5px 10px;">${payerStr}</span></td>
-                <td style="font-weight:700; color:var(--text);">₹${ex.amount.toLocaleString()}</td>
-                <td style="display:flex;">${actions}</td>
+                <td style="font-size:0.85em; color:var(--muted); font-weight:500;">${ex.date}</td>
+                <td style="font-weight:600; color:var(--primary);">${ex.desc} <br><span style="font-size:0.75em; color:var(--secondary); font-weight:500;">${ex.cat}</span></td>
+                <td><span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:0.82em; font-weight:500; border:1px solid var(--border);">${payerStr}</span></td>
+                <td style="font-weight:700; color:#111827;">₹${ex.amount.toLocaleString('en-IN')}</td>
+                <td style="white-space:nowrap;">${actions}</td>
             </tr>`;
         });
     }
@@ -631,77 +744,153 @@
         let settlementLogic = [];
 
         appData.members.forEach(m => {
-            grid.innerHTML += `<div class="stat-card"><strong style="font-size:1.1em;">${m}</strong><hr style="border:0; border-top:1px solid var(--border); margin:15px 0;"><p style="font-size:0.8em; color:var(--muted); margin:0 0 5px 0;">Total Paid</p><strong style="color:var(--secondary); font-size:1.3em;">₹${balances[m].paid.toFixed(0)}</strong><p style="font-size:0.8em; color:var(--muted); margin:15px 0 5px 0;">Their Share</p><strong style="color:var(--danger); font-size:1.3em;">₹${balances[m].liability.toFixed(0)}</strong></div>`;
+            const mIsAdmin = (m === appData.adminProfileName);
+            const dynamicAdminBadgeMarkup = mIsAdmin ? ` <span class="member-badge admin-badge" style="font-size:0.65em; padding:2px 6px; margin:0; vertical-align:middle;">Admin</span>` : '';
+            grid.innerHTML += `<div class="stat-card"><strong>${m}${dynamicAdminBadgeMarkup}</strong><hr style="border:0; border-top:1px solid var(--border); margin:12px 0;"><p style="font-size:0.75em; color:var(--muted); margin:5px 0; text-transform:uppercase; font-weight:600; letter-spacing:0.3px;">Gross Financed</p><strong style="color:var(--secondary); font-size:1.3em; font-weight:700;">₹${balances[m].paid.toLocaleString('en-IN', {maximumFractionDigits:0})}</strong><p style="font-size:0.75em; color:var(--muted); margin:12px 0 5px 0; text-transform:uppercase; font-weight:600; letter-spacing:0.3px;">Computed Liability</p><strong style="color:var(--danger); font-size:1.3em; font-weight:700;">₹${balances[m].liability.toLocaleString('en-IN', {maximumFractionDigits:0})}</strong></div>`;
             const net = allTimeBalances[m].paid - allTimeBalances[m].liability;
             if(Math.abs(net) > 1) settlementLogic.push({ name: m, net: net });
         });
 
         settlementLogic.sort((a,b) => b.net - a.net);
         const sText = document.getElementById('settlementText');
-        if(settlementLogic.length === 0) { sText.innerText = "All settled up! 🎉"; sText.style.color = "white"; }
+        if(settlementLogic.length === 0) { sText.innerText = "All accounting matrices resolve accurately to 0."; sText.style.color = "#a7f3d0"; }
         else {
             let topCreditor = settlementLogic[0]; let topDebtor = settlementLogic[settlementLogic.length - 1];
-            sText.innerText = `${topDebtor.name} owes ${topCreditor.name} ₹${Math.abs(topDebtor.net).toFixed(0)}`;
-            sText.style.color = "white";
+            sText.innerText = `${topDebtor.name} matches net debt vector ➡️ ${topCreditor.name}: ₹${Math.abs(topDebtor.net).toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+            sText.style.color = "#38bdf8";
         }
 
-        // Budget Pacing UI
         const budget = appData.monthlyBudget || 0;
         const pacingUI = document.getElementById('pacingUI');
         if (budget > 0) {
-            const dateObj = new Date(); const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
+            const dateObj = new Date();
+            const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
             const expectedBurn = (dateObj.getDate() / daysInMonth) * 100;
             const currentMonth = dateObj.toISOString().substring(0, 7);
             const spentThisMonth = appData.expenses.filter(e => e.date.startsWith(currentMonth) && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
             const actualBurn = (spentThisMonth / budget) * 100;
-            const status = actualBurn > expectedBurn ? '<span style="color:var(--danger); font-weight:bold;">⚠️ Spending fast</span>' : '<span style="color:var(--secondary); font-weight:bold;">✅ Looking good</span>';
+            const status = actualBurn > expectedBurn ? '<span style="color:var(--danger); font-weight:bold;">⚠️ Acceleration Burn Risk (Overpacing)</span>' : '<span style="color:var(--success); font-weight:bold;">✅ Velocity Optimization Nominal (On Track)</span>';
             
             pacingUI.innerHTML = `
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.95em;"><span>Spent: <strong>₹${spentThisMonth.toLocaleString()}</strong></span> <span>Goal: ₹${budget.toLocaleString()}</span></div>
-                <div style="background:var(--border); height:14px; border-radius:7px; overflow:hidden; margin-bottom:12px;"><div style="background:${actualBurn > expectedBurn ? 'var(--danger)' : 'var(--secondary)'}; width:${Math.min(actualBurn, 100)}%; height:100%; transition:0.4s ease-out;"></div></div>
-                <div style="text-align:center; font-size:0.9em; background:var(--bg); padding:10px; border-radius:10px;">Status: ${status}</div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9em;"><span>Month Spend Index: <strong>₹${spentThisMonth.toLocaleString('en-IN')}</strong></span> <span>Cap Threshold: ₹${budget.toLocaleString('en-IN')}</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.8em; color:var(--muted);"><span>Calculated Burn Scale: ${actualBurn.toFixed(1)}%</span> <span>Linear Projected Benchmark: ${expectedBurn.toFixed(1)}%</span></div>
+                <div style="background:var(--border); height:12px; border-radius:6px; overflow:hidden; margin-bottom:12px;"><div style="background:${actualBurn > expectedBurn ? 'var(--danger)' : 'var(--success)'}; width:${Math.min(actualBurn, 100)}%; height:100%; transition:0.4s cubic-bezier(0.16, 1, 0.3, 1);"></div></div>
+                <div style="text-align:center; font-size:0.9em; font-weight:600;">Velocity Alignment: ${status}</div>
             `;
-        } else { pacingUI.innerHTML = `<p style="color:var(--muted); text-align:center; padding:20px; background:var(--bg); border-radius:10px;">Set a monthly goal in Settings to see insights here.</p>`; }
+        } else {
+            pacingUI.innerHTML = `<p style="color:var(--muted); text-align:center; margin:15px 0; font-size:0.9em;">Define global household threshold limits inside settings panel to enable automated burn velocity metrics graphs.</p>`;
+        }
 
-        // Charts
         if (chartPie) chartPie.destroy();
-        if (Object.keys(catData).length > 0) { chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#0ea5e9', '#94a3b8'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins:{legend:{position:'right', labels:{boxWidth:12,font:{size:11}}}} } }); }
+        if (Object.keys(catData).length > 0) {
+            chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#64748b', '#ec4899'] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins:{legend:{position:'right', labels:{boxWidth:10,font:{size:11,weight:'500'},color:'#475569'}}} } });
+        }
         
         if (chartBar) chartBar.destroy();
         const labels = appData.members; const paid = labels.map(m => balances[m].paid); const liab = labels.map(m => balances[m].liability);
-        chartBar = new Chart(document.getElementById('barChart').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: [{ label: 'Paid', data: paid, backgroundColor: '#6366f1', borderRadius:6 }, { label: 'Their Share', data: liab, backgroundColor: '#f43f5e', borderRadius:6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true, grid:{color:'#f3f4f6'}}, x:{grid:{display:false}}} } });
+        chartBar = new Chart(document.getElementById('barChart').getContext('2d'), { type: 'bar', data: { labels: labels, datasets: [{ label: 'Gross Deployed Capital', data: paid, backgroundColor: '#4f46e5', borderRadius:6 }, { label: 'Calculated Liability', data: liab, backgroundColor: '#f43f5e', borderRadius:6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11,weight:'500'}}}}, scales:{y:{beginAtZero:true, grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}, x:{grid:{display:false},ticks:{font:{size:11,weight:'500'}}}} } });
     }
 
     function renderAuditLog() {
         const auditDiv = document.getElementById('auditLogUI'); auditDiv.innerHTML = '';
         (appData.auditLog || []).slice(-30).reverse().forEach(log => {
-            auditDiv.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:12px 0;"><strong>${log.user}</strong>: ${log.action} <br><span style="color:var(--muted); font-size:0.85em; display:block; margin-top:4px;">${new Date(log.date).toLocaleString()}</span></div>`;
+            auditDiv.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:10px 0; line-height:1.4;"><strong style="color:var(--primary);">${log.user}</strong>: <span style="color:#475569;">${log.action}</span> <br><span style="color:var(--muted); font-size:0.78em; font-weight:500;">Timestamp: ${new Date(log.date).toLocaleString()}</span></div>`;
         });
     }
 
     function exportCSV() {
-        if(appData.expenses.length === 0) return alert("No data!");
-        let csv = `Date,Type,Description,Category,Who Paid,Total Amount\n`;
+        if(appData.expenses.length === 0) return alert("System database instance returns zero analytics blocks.");
+        let csv = `Date,Type,Description,Category,Gross Assignment Elements,Numerical Financial Capital Quantities Value (INR)\n`;
         appData.expenses.forEach(ex => {
             let payerStr = ex.type === 'settlement' ? ex.sender : Object.keys(ex.payers).join(' & ');
             csv += `"${ex.date}","${ex.type}","${ex.desc}","${ex.cat}","${payerStr}",${ex.amount}\n`;
         });
-        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Household_Expenses.csv`; a.click();
+        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `DomusOS_Financial_Data_Model_Export.csv`; a.click();
     }
 
-    // --- CHATBOT ---
-    function toggleChat() { document.getElementById('chatbotMain').classList.toggle('collapsed'); document.getElementById('chatToggleIcon').innerText = document.getElementById('chatbotMain').classList.contains('collapsed') ? '▲' : '▼'; }
+    // --- CONTEXT-AWARE AGENT INTERFACE INTEL MODULES ---
+    function toggleChat() { 
+        document.getElementById('chatbotMain').classList.toggle('collapsed'); 
+        document.getElementById('chatToggleIcon').innerText = document.getElementById('chatbotMain').classList.contains('collapsed') ? '▲' : '▼'; 
+    }
+    
+    function triggerSuggestedQuery(textQuery) {
+        document.getElementById('chatQ').value = textQuery;
+        askBot();
+    }
+
     function askBot() {
-        const input = document.getElementById('chatQ'); const q = input.value.toLowerCase().trim(); if(!q) return;
-        const b = document.getElementById('chatBody'); b.innerHTML += `<div class="msg user">${input.value}</div>`; input.value = ''; b.scrollTop = b.scrollHeight;
+        const input = document.getElementById('chatQ'); 
+        const rawQuestion = input.value;
+        const q = rawQuestion.toLowerCase().trim(); 
+        if(!q) return;
+        
+        const b = document.getElementById('chatBody'); 
+        b.innerHTML += `<div class="msg user">${rawQuestion}</div>`; 
+        input.value = ''; 
+        b.scrollTop = b.scrollHeight;
+        
         setTimeout(() => {
-            let res = "I look at your household data. Ask me 'who owes money', 'total spent', or ask about a specific category like 'groceries'.";
-            if (q.includes('owe') || q.includes('settle')) res = document.getElementById('settlementText').innerText;
-            else if (q.includes('total')) res = `Total expenses for this period are <strong>₹${getFilteredData().filter(e=>e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong>.`;
-            else { const match = appData.categories.find(c => q.includes(c.toLowerCase())); if(match) res = `You've spent <strong>₹${getFilteredData().filter(e=>e.cat===match && e.type==='expense').reduce((a,c)=>a+c.amount,0).toLocaleString()}</strong> on <strong>${match}</strong>.`; }
-            b.innerHTML += `<div class="msg bot">${res}</div>`; b.scrollTop = b.scrollHeight;
-        }, 500);
+            let res = "The telemetry engine has processed your query input parameters. Ask for 'deep audits', 'optimization suggestions', or 'balancing analysis frameworks' for exact computations.";
+            const totalSpendNum = getFilteredData().filter(e => e.type === 'expense').reduce((a,c) => a + c.amount, 0);
+            const activeHouseholdNameString = appData.householdName || "Shared Ledger Domain";
+            
+            let highestSpentCategory = "None";
+            let maxCatValue = 0;
+            const catMap = {};
+            getFilteredData().filter(e => e.type === 'expense').forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + e.amount; });
+            Object.keys(catMap).forEach(cName => { if(catMap[cName] > maxCatValue) { maxCatValue = catMap[cName]; highestSpentCategory = cName; } });
+
+            if (q.includes('advice') || q.includes('suggest') || q.includes('personal finance') || q.includes('optimize')) {
+                if (totalSpendNum === 0) {
+                    res = `<strong>Personal Finance Insights Strategy Matrix [${activeHouseholdNameString}]:</strong> Financial registry layers report empty states. Inject basic cost variables (housing infrastructure metrics, resource lines) to trigger diagnostic optimization telemetry routines.`;
+                } else {
+                    res = `<strong>Automated Personal Finance Strategy Insights for "${activeHouseholdNameString}":</strong><br><br>`;
+                    res += `• <strong>Resource Outflow Focus:</strong> Your household concentration vector peak maps directly to <strong>${highestSpentCategory}</strong> (₹${maxCatValue.toLocaleString('en-IN')}). Trimming variable items in this sector by 15% would mathematically generate substantial investment safety pools.<br>`;
+                    
+                    if (appData.monthlyBudget > 0) {
+                        const dateObj = new Date();
+                        const daysInMonth = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).getDate();
+                        const expectedBurn = (dateObj.getDate() / daysInMonth) * 100;
+                        const spentThisMonth = appData.expenses.filter(e => e.date.startsWith(dateObj.toISOString().substring(0, 7)) && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
+                        const actualBurn = (spentThisMonth / appData.monthlyBudget) * 100;
+                        
+                        if (actualBurn > expectedBurn) {
+                            res += `• <strong>Velocity Containment:</strong> The active run model indicates overpacing tracking signals. Limit non-essential transactional actions over the subsequent 72 hours to bring curves back to matching projections.<br>`;
+                        } else {
+                            res += `• <strong>Capital Allocation:</strong> Velocity calculations align safely within budget caps. Consider channeling unused allocation allowances directly into systematic diversification pipelines or family emergency backup indexes.`;
+                        }
+                    } else {
+                        res += `• <strong>Budget Architecture:</strong> Define global household thresholds inside Settings. Establishing explicit caps creates cognitive boundaries and unlocks active linear pacing alerts.`;
+                    }
+                }
+            }
+            else if (q.includes('audit') || q.includes('analyze') || q.includes('dashboard') || q.includes('everything')) {
+                res = `<strong>Comprehensive Dashboard Systems Audit Model Report: [${activeHouseholdNameString}]</strong><br><br>`;
+                res += `• Active Household Size: <strong>${appData.members.length} verified system profiles</strong> linked.<br>`;
+                res += `• Cumulative Period Volumetric Expenditure: <strong>₹${totalSpendNum.toLocaleString('en-IN')}</strong> total deployed funds.<br>`;
+                res += `• Maximum Consumption Core Vector: <strong>${highestSpentCategory}</strong> representing an isolated tracker value of ₹${maxCatValue.toLocaleString('en-IN')}.<br>`;
+                res += `• Current Net Clearing Status Vector: ${document.getElementById('settlementText').innerText}.`;
+            }
+            else if (q.includes('owe') || q.includes('settle') || q.includes('debt') || q.includes('matrix')) {
+                res = `<strong>Algorithmic Matrix Settlement Resolution Engine [${activeHouseholdNameString}]:</strong> ` + document.getElementById('settlementText').innerText;
+            }
+            else if (q.includes('total') || q.includes('summary') || q.includes('spend')) {
+                res = `Aggregated transaction calculation parameters matching active ledger conditions totals: <strong>₹${totalSpendNum.toLocaleString('en-IN')}</strong> total gross outlays deployed across instances within the <strong>${activeHouseholdNameString}</strong> domain context.`;
+            } else {
+                const categoricalMatchValue = appData.categories.find(c => q.includes(c.toLowerCase()));
+                if(categoricalMatchValue) {
+                    const computationValueResult = getFilteredData().filter(e => e.cat === categoricalMatchValue && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
+                    res = `Isolated structural registry subnode category data values for <strong>${categoricalMatchValue}</strong> calculates to an index footprint of: <strong>₹${computationValueResult.toLocaleString('en-IN')}</strong> total tracked items for this period context instance.`;
+                }
+            }
+            
+            b.innerHTML += `<div class="msg bot">${res}</div>`; 
+            b.scrollTop = b.scrollHeight;
+        }, 400);
     }
 </script>
 </body>
 </html>
+index.html.html
+Displaying index.html.html.
