@@ -35,10 +35,13 @@
         .view-section.active { display: flex; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Setup UI */
-        .landing-container { max-width: 480px; margin: auto; background: var(--card); padding: 50px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
+        /* Setup / Login UI */
+        .landing-container { max-width: 600px; margin: auto; background: var(--card); padding: 50px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
         .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.6em; font-weight: 800; letter-spacing: -1px; }
         .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 35px; font-size: 1.05em; }
+        
+        .login-box { background: var(--bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); text-align: left; margin-bottom: 15px; }
+        .login-box h3 { margin-top: 0; color: var(--primary); font-size: 1.1em; margin-bottom: 15px; }
 
         /* App Layout */
         #sidebar { background: var(--primary); width: 280px; display: flex; flex-direction: column; padding: 25px 0; z-index: 100; justify-content: space-between; }
@@ -62,7 +65,7 @@
         button.primary-btn { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(51, 78, 104, 0.2); }
         button.primary-btn:hover { box-shadow: 0 6px 15px rgba(51, 78, 104, 0.3); }
         button.outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none; }
-        button.outline:hover { border-color: var(--primary); background: var(--primary-light); }
+        button.outline:hover { border-color: var(--primary); background: var(--card); }
         
         .badge { background: var(--primary-light); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 0.85em; font-weight: 700; display: inline-block; margin: 4px; border: 1px solid #BCCCDC; }
         .stat-card { background: white; border: 1px solid var(--border); padding: 25px; border-radius: 14px; text-align: center; }
@@ -82,6 +85,7 @@
             .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; font-size: 0.7em; gap: 4px; border-left: none; border-top: 3px solid transparent; color: #BCCCDC; }
             .nav-item:hover, .nav-item.active { border-left: none; border-top: 3px solid var(--secondary); background: rgba(255,255,255,0.05); }
             #main-content { padding: 15px; padding-bottom: 100px; }
+            .grid-2 { grid-template-columns: 1fr; }
         }
 
         /* Ask Domus Agent - DOCKED TO BOTTOM */
@@ -118,27 +122,36 @@
 </head>
 <body>
 
-<!-- SETUP / LANDING -->
+<!-- SETUP / LANDING (NEW LOGIN SYSTEM) -->
 <div id="viewLanding" class="view-section active" style="align-items:center; justify-content:center;">
     <div class="landing-container">
         <h1>Domus.</h1>
-        <p>The structured, calm, and collaborative way to manage household finances, share bills, and monitor budgets.</p>
+        <p>Your secure household financial engine. Identify yourself to access your workspace.</p>
         
-        <div class="form-group">
-            <label>What's your name?</label>
-            <input type="text" id="userProfileName" placeholder="e.g., Sarah">
+        <div class="form-group" style="text-align: center;">
+            <input type="text" id="userProfileName" placeholder="Enter Your Name (e.g., Sarah)" style="text-align: center; font-size: 1.1em; font-weight: 700;">
         </div>
 
-        <div class="form-group" id="householdNameFieldGroup">
-            <label>Household Name</label>
-            <input type="text" id="householdNameInput" placeholder="e.g., The Watson Home">
+        <!-- Option 1: Resume (Only visible if browser remembers a previous session) -->
+        <div id="resumeContainer" class="login-box" style="display:none; text-align: center; background:var(--primary-light); border-color:#BCCCDC;">
+            <h3 style="text-align: center;">Welcome Back</h3>
+            <p style="font-size:0.85em; color:var(--text); text-align:center; margin-top:-5px; margin-bottom:15px;">We securely found your previous session.</p>
+            <button class="primary-btn" onclick="resumeHousehold()">Enter Dashboard</button>
         </div>
 
-        <div style="margin-top: 35px;">
-            <button id="btnInitHousehold" class="primary-btn" onclick="processIdentityAndExecute('create')">Create New Household</button>
-            <div id="joinOptionContainer" style="display:none; border-top: 1px solid var(--border); margin-top: 25px; padding-top: 30px;">
-                <p style="font-size:0.95em; margin-bottom:15px; color: var(--success); font-weight: 700;">✓ Secure Invite Link Verified</p>
-                <button class="primary-btn" id="btnJoinHousehold" onclick="processIdentityAndExecute('join')">Join Household</button>
+        <div class="grid-2" style="gap:15px;">
+            <!-- Option 2: Login via Link -->
+            <div class="login-box">
+                <h3>Enter a Household</h3>
+                <input type="text" id="loginLinkInput" placeholder="Paste Invite Link here" style="margin-bottom:15px; padding:12px; font-size:0.9em; background:white;">
+                <button class="outline" onclick="loginToHousehold()">Join / Login</button>
+            </div>
+            
+            <!-- Option 3: Create New -->
+            <div class="login-box">
+                <h3>Create New</h3>
+                <input type="text" id="householdNameInput" placeholder="Household Name" style="margin-bottom:15px; padding:12px; font-size:0.9em; background:white;">
+                <button class="outline" onclick="processIdentityAndExecute('create')">Create</button>
             </div>
         </div>
     </div>
@@ -169,7 +182,7 @@
                         <p style="margin: 0; font-size: 0.85em; color: var(--muted); cursor: pointer; font-weight: 600;" onclick="copyInviteLink()">📋 Copy Invite Link</p>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap:wrap;">
                     <span id="headerName" style="font-weight:700; font-size:0.9em; background:var(--primary-light); color:var(--text); padding:10px 18px; border-radius:20px;"></span>
                     <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 10px 16px; margin:0;">
                     <button class="outline" style="width: auto; padding: 10px 20px; border-radius:20px;" onclick="clearFilter()">Clear</button>
@@ -232,7 +245,7 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                         <h2 style="margin: 0; color:var(--primary);">Transaction History</h2>
-                        <div style="display:flex; gap:12px;">
+                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
                             <button class="outline" style="padding:10px 18px; font-size:0.9em; width:auto;" onclick="pullRecurringExpenses()">🔁 Pull Recurring</button>
                             <input type="text" id="searchLedger" placeholder="Search records..." onkeyup="renderTable()" style="width: 200px; padding: 10px 16px; border-radius:20px; border:1px solid var(--border);">
                         </div>
@@ -375,7 +388,7 @@
     // ========================================================
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
     // ========================================================
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyAj3Po9mtX74zWBpWkGgwB58Z7pfLg_zsU",
   authDomain: "trackyourexpense-d5ad5.firebaseapp.com",
   projectId: "trackyourexpense-d5ad5",
@@ -402,30 +415,51 @@
     document.getElementById('settleDate').value = today;
     document.getElementById('globalMonthFilter').value = today.substring(0, 7);
 
-    // --- BOOTSTRAPPING (WITH AUTO-REDIRECT) ---
+    // --- BOOTSTRAPPING (NEW LOGIN SYSTEM) ---
     window.addEventListener('DOMContentLoaded', async () => {
-        // Auto-redirect to saved dashboard if user opens base link
-        if (!dashboardId && savedDb) {
-            window.location.href = `?db=${savedDb}`;
-            return;
-        }
+        // Pre-fill name if known
+        if (myName) document.getElementById('userProfileName').value = myName;
 
         if (dashboardId) {
-            // Save this as the most recent dashboard visited
-            localStorage.setItem('domusOS_LastDB', dashboardId);
-            
-            document.getElementById('householdNameFieldGroup').style.display = 'none';
-            document.getElementById('btnInitHousehold').style.display = 'none';
-            document.getElementById('joinOptionContainer').style.display = 'block';
-        }
-        
-        if (myName && dashboardId) {
-            bootDashboard();
+            // User landed on a specific invite link
+            localStorage.setItem('domusOS_LastDB', dashboardId); // Save for later
+            bootDashboard(); // Go straight in
         } else {
-            if (myName) document.getElementById('userProfileName').value = myName;
+            // User landed on the base URL (no ?db=)
             document.getElementById('viewLanding').style.display = 'flex';
+            
+            // If they have a saved database, show the Resume button
+            if (savedDb) {
+                document.getElementById('resumeContainer').style.display = 'block';
+            }
         }
     });
+
+    // --- LOGIN / CREATE ACTIONS ---
+    function resumeHousehold() {
+        const inputName = document.getElementById('userProfileName').value.trim();
+        if(!inputName) return alert("Please enter your name first.");
+        localStorage.setItem('domusOS_Name', inputName);
+        window.location.href = `?db=${savedDb}`;
+    }
+
+    function loginToHousehold() {
+        const inputName = document.getElementById('userProfileName').value.trim();
+        if(!inputName) return alert("Please enter your name first.");
+        
+        let link = document.getElementById('loginLinkInput').value.trim();
+        if(!link) return alert("Please paste your invite link or ID.");
+        
+        localStorage.setItem('domusOS_Name', inputName);
+        
+        // Extract ID if they pasted a full URL
+        let dbId = link;
+        if(link.includes('?db=')) {
+            dbId = link.split('?db=')[1].split('&')[0];
+        }
+        
+        window.location.href = `?db=${dbId}`;
+    }
 
     function processIdentityAndExecute(strategy) {
         const inputName = document.getElementById('userProfileName').value.trim();
@@ -437,7 +471,7 @@
             const hName = document.getElementById('householdNameInput').value.trim();
             if(!hName) return alert("Please enter a Household name.");
             createNewDashboard(hName);
-        } else if (strategy === 'join') { bootDashboard(); }
+        }
     }
 
     async function createNewDashboard(householdName) {
@@ -480,7 +514,7 @@
                     syncToCloud();
                 } else { renderApp(); }
             } else {
-                alert("Dashboard not found.");
+                alert("Dashboard not found. It may have been deleted.");
                 localStorage.removeItem('domusOS_LastDB');
                 window.location.href = window.location.pathname; 
             }
