@@ -121,7 +121,7 @@
 <!-- SETUP / LANDING -->
 <div id="viewLanding" class="view-section active" style="align-items:center; justify-content:center;">
     <div class="landing-container">
-        <h1>Domus<span style="color:var(--secondary)">.</span></h1>
+        <h1>Domus.</h1>
         <p>The structured, calm, and collaborative way to manage household finances, share bills, and monitor budgets.</p>
         
         <div class="form-group">
@@ -375,7 +375,7 @@
     // ========================================================
     // ⚠️ PASTE YOUR FIREBASE CONFIG HERE ⚠️
     // ========================================================
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyAj3Po9mtX74zWBpWkGgwB58Z7pfLg_zsU",
   authDomain: "trackyourexpense-d5ad5.firebaseapp.com",
   projectId: "trackyourexpense-d5ad5",
@@ -383,15 +383,17 @@
   messagingSenderId: "104147538477",
   appId: "1:104147538477:web:6c2d325232f92f2a325ea4",
   measurementId: "G-1JKSP8DMKP"
-};
-    
+};    
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
     const storage = firebase.storage();
 
     // --- STATE CONFIGS ---
-    let dashboardId = new URLSearchParams(window.location.search).get('db');
+    let urlParams = new URLSearchParams(window.location.search);
+    let dashboardId = urlParams.get('db');
     let myName = localStorage.getItem('domusOS_Name');
+    let savedDb = localStorage.getItem('domusOS_LastDB');
+
     let appData = null;
     let chartPie = null, chartBar = null, comparativeChart = null;
 
@@ -400,13 +402,23 @@
     document.getElementById('settleDate').value = today;
     document.getElementById('globalMonthFilter').value = today.substring(0, 7);
 
-    // --- BOOTSTRAPPING ---
+    // --- BOOTSTRAPPING (WITH AUTO-REDIRECT) ---
     window.addEventListener('DOMContentLoaded', async () => {
+        // Auto-redirect to saved dashboard if user opens base link
+        if (!dashboardId && savedDb) {
+            window.location.href = `?db=${savedDb}`;
+            return;
+        }
+
         if (dashboardId) {
+            // Save this as the most recent dashboard visited
+            localStorage.setItem('domusOS_LastDB', dashboardId);
+            
             document.getElementById('householdNameFieldGroup').style.display = 'none';
             document.getElementById('btnInitHousehold').style.display = 'none';
             document.getElementById('joinOptionContainer').style.display = 'block';
         }
+        
         if (myName && dashboardId) {
             bootDashboard();
         } else {
@@ -432,6 +444,7 @@
         const newId = db.collection('shared_dashboards').doc().id;
         const secureAdminToken = Math.random().toString(36).substring(2, 15);
         localStorage.setItem('domusOS_AdminKey_' + newId, secureAdminToken);
+        localStorage.setItem('domusOS_LastDB', newId);
         
         await db.collection('shared_dashboards').doc(newId).set({
             created_at: Date.now(),
@@ -468,6 +481,7 @@
                 } else { renderApp(); }
             } else {
                 alert("Dashboard not found.");
+                localStorage.removeItem('domusOS_LastDB');
                 window.location.href = window.location.pathname; 
             }
         });
@@ -672,7 +686,7 @@
     
     function addCategory() { const val = document.getElementById('newCat').value.trim(); if(val && !appData.categories.includes(val)) { appData.categories.push(val); document.getElementById('newCat').value = ''; syncToCloud(); } }
     function removeCategory(cat) { if(cat==="Settlement") return; appData.categories = appData.categories.filter(c => c !== cat); syncToCloud(); }
-    function factoryReset() { if(confirm("WARNING: This deletes the dashboard for everyone.")) { db.collection('shared_dashboards').doc(dashboardId).delete().then(() => window.location.href = window.location.pathname); } }
+    function factoryReset() { if(confirm("WARNING: This deletes the dashboard for everyone.")) { db.collection('shared_dashboards').doc(dashboardId).delete().then(() => { localStorage.removeItem('domusOS_LastDB'); window.location.href = window.location.pathname; }); } }
 
     // --- RENDER ENGINE ---
     function renderApp() {
@@ -713,11 +727,11 @@
         
         appData.members.forEach(m => {
             const mIsAdmin = (m === appData.adminProfileName);
-            const badge = mIsAdmin ? ' <span title="Admin" style="color:var(--primary); font-size:0.9em;">✦</span>' : '';
+            const badge = mIsAdmin ? ' <span title="Admin" style="color:var(--secondary); font-size:1.1em; line-height:1;">✦</span>' : '';
             pSelect.innerHTML += `<option value="${m}">${m} ${m===myName?'(You)':''}</option>`;
             sSend.innerHTML += `<option value="${m}">${m}</option>`;
             sRec.innerHTML += `<option value="${m}">${m}</option>`;
-            mList.innerHTML += `<span class="badge">${m}${badge}</span>`;
+            mList.innerHTML += `<span class="badge" style="display:inline-flex; align-items:center; gap:4px;">${m}${badge}</span>`;
         });
         if(appData.members.includes(myName)) { pSelect.value = myName; sSend.value = myName; }
 
