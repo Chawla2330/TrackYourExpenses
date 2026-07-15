@@ -10,6 +10,27 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
+    <script>
+        // INSTANT MEMORY REDIRECT ENGINE
+        let urlParams = new URLSearchParams(window.location.search);
+        let currentDb = urlParams.get('db');
+        let joinedHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+        
+        // If user hits base URL but has joined households, auto-load their last view
+        if (!currentDb && joinedHouseholds.length > 0) {
+            let lastView = localStorage.getItem('domusOS_LastView');
+            if(lastView && lastView !== 'all') {
+                window.location.replace("?db=" + lastView);
+            }
+        }
+        
+        // If a new link is opened, ensure it gets saved to their array
+        if (currentDb && !joinedHouseholds.includes(currentDb)) {
+            joinedHouseholds.push(currentDb);
+            localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(joinedHouseholds));
+        }
+    </script>
+
     <style>
         /* Domus Official Color Palette */
         :root { 
@@ -35,13 +56,10 @@
         .view-section.active { display: flex; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Setup / Login UI */
-        .landing-container { max-width: 600px; margin: auto; background: var(--card); padding: 50px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
+        /* Setup UI */
+        .landing-container { max-width: 450px; margin: auto; background: var(--card); padding: 50px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
         .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.6em; font-weight: 800; letter-spacing: -1px; }
         .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 35px; font-size: 1.05em; }
-        
-        .login-box { background: var(--bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); text-align: left; margin-bottom: 15px; }
-        .login-box h3 { margin-top: 0; color: var(--primary); font-size: 1.1em; margin-bottom: 15px; }
 
         /* App Layout */
         #sidebar { background: var(--primary); width: 280px; display: flex; flex-direction: column; padding: 25px 0; z-index: 100; justify-content: space-between; }
@@ -64,14 +82,14 @@
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(244, 162, 97, 0.35); filter: brightness(1.05); }
         button.primary-btn { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(51, 78, 104, 0.2); }
         button.primary-btn:hover { box-shadow: 0 6px 15px rgba(51, 78, 104, 0.3); }
-        button.outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none; }
-        button.outline:hover { border-color: var(--primary); background: var(--card); }
+        button.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); box-shadow: none; }
+        button.outline:hover { background: var(--primary-light); }
         
         .badge { background: var(--primary-light); color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 0.85em; font-weight: 700; display: inline-block; margin: 4px; border: 1px solid #BCCCDC; }
         .stat-card { background: white; border: 1px solid var(--border); padding: 25px; border-radius: 14px; text-align: center; }
         .master-balance { background: var(--primary); color: white; padding: 40px; border-radius: var(--radius); text-align: center; box-shadow: 0 10px 25px rgba(51, 78, 104, 0.2); }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 800px; }
         th, td { padding: 18px 12px; border-bottom: 1px solid var(--border); text-align: left; }
         th { color: var(--muted); font-weight: 700; font-size: 0.85em; background: #F0F4F8; text-transform: uppercase; letter-spacing: 0.5px; }
         .row-settlement { background-color: rgba(42, 157, 143, 0.05); }
@@ -85,29 +103,11 @@
             .nav-item { flex: 1; flex-direction: column; justify-content: center; padding: 8px 0; font-size: 0.7em; gap: 4px; border-left: none; border-top: 3px solid transparent; color: #BCCCDC; }
             .nav-item:hover, .nav-item.active { border-left: none; border-top: 3px solid var(--secondary); background: rgba(255,255,255,0.05); }
             #main-content { padding: 15px; padding-bottom: 100px; }
-            .grid-2 { grid-template-columns: 1fr; }
         }
 
-        /* Ask Domus Agent - DOCKED TO BOTTOM */
-        .chatbot { 
-            position: fixed; 
-            bottom: 0; 
-            right: 30px; 
-            width: 360px; 
-            background: white; 
-            border-radius: 16px 16px 0 0; 
-            box-shadow: 0 -5px 25px rgba(16, 42, 67, 0.15); 
-            border: 1px solid var(--border); 
-            border-bottom: none;
-            z-index: 999; 
-            display: flex; 
-            flex-direction: column; 
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            transform: translateY(0); 
-        }
-        .chatbot.collapsed { 
-            transform: translateY(calc(100% - 60px)); 
-        }
+        /* Ask Domus Agent */
+        .chatbot { position: fixed; bottom: 0; right: 30px; width: 360px; background: white; border-radius: 16px 16px 0 0; box-shadow: 0 -5px 25px rgba(16, 42, 67, 0.15); border: 1px solid var(--border); border-bottom: none; z-index: 999; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: translateY(0); }
+        .chatbot.collapsed { transform: translateY(calc(100% - 60px)); }
         @media (max-width: 768px) { .chatbot { width: 90%; right: 5%; bottom: 75px; border-radius: 16px; border-bottom: 1px solid var(--border); } .chatbot.collapsed { transform: translateY(calc(100% - 60px)); } }
         
         .chat-head { background: var(--primary); color: white; padding: 18px 24px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; height: 60px; }
@@ -122,38 +122,18 @@
 </head>
 <body>
 
-<!-- SETUP / LANDING (NEW LOGIN SYSTEM) -->
+<!-- SETUP / LANDING -->
 <div id="viewLanding" class="view-section active" style="align-items:center; justify-content:center;">
     <div class="landing-container">
         <h1>Domus.</h1>
-        <p>Your secure household financial engine. Identify yourself to access your workspace.</p>
+        <p>The structured, calm, and collaborative way to manage household finances, share bills, and monitor budgets.</p>
         
-        <div class="form-group" style="text-align: center;">
-            <input type="text" id="userProfileName" placeholder="Enter Your Name (e.g., Sarah)" style="text-align: center; font-size: 1.1em; font-weight: 700;">
+        <div class="form-group" style="margin-bottom: 30px;">
+            <label>What's your name?</label>
+            <input type="text" id="userProfileName" placeholder="e.g., Sarah" style="background: white;">
         </div>
-
-        <!-- Option 1: Resume (Only visible if browser remembers a previous session) -->
-        <div id="resumeContainer" class="login-box" style="display:none; text-align: center; background:var(--primary-light); border-color:#BCCCDC;">
-            <h3 style="text-align: center;">Welcome Back</h3>
-            <p style="font-size:0.85em; color:var(--text); text-align:center; margin-top:-5px; margin-bottom:15px;">We securely found your previous session.</p>
-            <button class="primary-btn" onclick="resumeHousehold()">Enter Dashboard</button>
-        </div>
-
-        <div class="grid-2" style="gap:15px;">
-            <!-- Option 2: Login via Link -->
-            <div class="login-box">
-                <h3>Enter a Household</h3>
-                <input type="text" id="loginLinkInput" placeholder="Paste Invite Link here" style="margin-bottom:15px; padding:12px; font-size:0.9em; background:white;">
-                <button class="outline" onclick="loginToHousehold()">Join / Login</button>
-            </div>
-            
-            <!-- Option 3: Create New -->
-            <div class="login-box">
-                <h3>Create New</h3>
-                <input type="text" id="householdNameInput" placeholder="Household Name" style="margin-bottom:15px; padding:12px; font-size:0.9em; background:white;">
-                <button class="outline" onclick="processIdentityAndExecute('create')">Create</button>
-            </div>
-        </div>
+        
+        <button class="primary-btn" onclick="enterApp()">Enter Domus</button>
     </div>
 </div>
 
@@ -165,7 +145,6 @@
         <div id="sidebar">
             <div>
                 <div style="padding: 10px 25px 25px 25px; font-weight: 800; font-size: 1.8em; color: white; letter-spacing: -0.5px;">Domus<span style="color:var(--secondary)">.</span></div>
-                <div id="sidebarHouseholdBadge" style="padding: 0 25px 25px 25px; font-size: 0.85em; color: #9FB3C8; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; text-transform: uppercase;"></div>
                 <div class="nav-item active" onclick="nav('dash')">📝 Expenses & Ledger</div>
                 <div class="nav-item" onclick="nav('analytics')">📊 Budgets & Insights</div>
                 <div class="nav-item" onclick="nav('settle')">🤝 Settle Balances</div>
@@ -176,13 +155,16 @@
         <div id="main-content">
             <!-- Header -->
             <div class="top-bar">
-                <div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
                     <h3 style="margin: 0; font-size: 1.5em; color: var(--primary);" id="pageTitle">Expenses & Ledger</h3>
-                    <div id="adminLinkContainer" style="margin-top: 8px;">
-                        <p style="margin: 0; font-size: 0.85em; color: var(--muted); cursor: pointer; font-weight: 600;" onclick="copyInviteLink()">📋 Copy Invite Link</p>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <select id="contextSelector" onchange="switchContext(this.value)" style="padding: 8px 14px; border-radius: 8px; font-weight:700; color:var(--primary); background:var(--primary-light); border:none; outline:none; cursor:pointer; font-size:0.85em; width:auto; margin:0;">
+                            <option value="all">🌐 All Households (Cumulative)</option>
+                        </select>
+                        <span id="adminLinkContainer" style="font-size: 0.85em; color: var(--muted); cursor: pointer; font-weight: 600;" onclick="copyInviteLink()">📋 Copy Invite Link</span>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap:wrap;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <span id="headerName" style="font-weight:700; font-size:0.9em; background:var(--primary-light); color:var(--text); padding:10px 18px; border-radius:20px;"></span>
                     <input type="month" id="globalMonthFilter" onchange="renderApp()" style="width: auto; padding: 10px 16px; margin:0;">
                     <button class="outline" style="width: auto; padding: 10px 20px; border-radius:20px;" onclick="clearFilter()">Clear</button>
@@ -192,10 +174,15 @@
             <!-- TAB: EXPENSES -->
             <div id="tab-dash" class="app-tab active" style="width:100%;">
                 
-                <div class="card" id="entryFormCard" style="max-width: 900px; margin-bottom: 40px;">
+                <div class="card" id="entryFormCard" style="max-width: 950px; margin-bottom: 40px;">
                     <h2 id="formTitle" style="margin-top:0; color:var(--primary);">Log an Expense</h2>
                     <input type="hidden" id="editId">
                     
+                    <div class="form-group" id="targetHouseholdGroup" style="display:none; background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border);">
+                        <label>Target Household</label>
+                        <select id="targetHouseholdSelect" style="background:white;"></select>
+                    </div>
+
                     <div class="grid-2" style="margin-bottom: 24px;">
                         <div class="form-group" style="margin:0;"><label>Date</label><input type="date" id="dateInput"></div>
                         <div class="form-group" style="margin:0;"><label>Total Amount (₹)</label><input type="number" id="amount" placeholder="0.00" oninput="updateAllCustomSplits()"></div>
@@ -245,14 +232,14 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                         <h2 style="margin: 0; color:var(--primary);">Transaction History</h2>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <div style="display:flex; gap:12px;">
                             <button class="outline" style="padding:10px 18px; font-size:0.9em; width:auto;" onclick="pullRecurringExpenses()">🔁 Pull Recurring</button>
                             <input type="text" id="searchLedger" placeholder="Search records..." onkeyup="renderTable()" style="width: 200px; padding: 10px 16px; border-radius:20px; border:1px solid var(--border);">
                         </div>
                     </div>
                     <div style="overflow-x: auto; margin-top: 25px;">
                         <table id="ledgerTable">
-                            <thead><tr><th>Date</th><th>Details</th><th>Paid By</th><th>Total Amount</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Date</th><th>Household</th><th>Details</th><th>Paid By</th><th>Amount</th><th>Actions</th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>
@@ -267,13 +254,11 @@
                 </div>
                 
                 <div class="grid-2" style="margin-bottom: 30px;">
-                    <!-- Budget Visualizer -->
                     <div class="card" style="margin:0;">
                         <h3 style="margin-top:0; color:var(--primary);">Monthly Budget</h3>
                         <div id="pacingUI"></div>
                     </div>
 
-                    <!-- Comparative Analytics -->
                     <div class="card" style="margin:0;">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:15px;">
                             <h3 style="margin:0; color:var(--primary);">Comparative Spend</h3>
@@ -288,7 +273,6 @@
                 
                 <div class="card">
                     <h3 style="margin-top:0; color:var(--primary);">Category Budgets & Alerts</h3>
-                    <p style="font-size:0.9em; color:var(--muted); margin-top:-10px;">Set limits and custom alert thresholds in Settings.</p>
                     <div id="categoryPacingUI" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top:20px;"></div>
                 </div>
 
@@ -307,7 +291,13 @@
             <div id="tab-settle" class="app-tab" style="display:none; width:100%;">
                 <div class="card" style="max-width: 600px; margin: 0 auto; padding: 40px;">
                     <h2 style="text-align: center; margin-top:0; color:var(--primary); font-size: 1.8em;">Record a Settlement</h2>
-                    <p style="text-align: center; color: var(--muted); margin-bottom: 35px; font-size:1.05em; line-height:1.5;">Log direct payments between members here to update the master balance without altering the expense history.</p>
+                    <p style="text-align: center; color: var(--muted); margin-bottom: 35px; font-size:1.05em; line-height:1.5;">Log direct payments between members here to update the master balance.</p>
+                    
+                    <div class="form-group" id="settleHouseholdGroup" style="display:none; background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border);">
+                        <label>Target Household</label>
+                        <select id="settleHouseholdSelect" style="background:white;"></select>
+                    </div>
+
                     <div class="grid-2">
                         <div class="form-group"><label>Date of Payment</label><input type="date" id="settleDate"></div>
                         <div class="form-group"><label>Amount Paid (₹)</label><input type="number" id="settleAmount" placeholder="0.00"></div>
@@ -321,18 +311,40 @@
 
             <!-- TAB: SETTINGS -->
             <div id="tab-settings" class="app-tab" style="display:none; width:100%;">
-                <div class="grid-2">
+                
+                <div class="card" style="background: var(--bg); border: 1px dashed var(--primary);">
+                    <h2 style="margin-top:0; color:var(--primary);">🏠 Manage Households</h2>
+                    <p style="font-size:0.9em; color:var(--muted); margin-top:-10px; margin-bottom:20px;">Create new spaces or join existing ones.</p>
+                    <div class="grid-2">
+                        <div style="background:white; padding:20px; border-radius:12px; border:1px solid var(--border);">
+                            <label>Create New Household</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="newHouseholdName" placeholder="e.g., Vacation Fund">
+                                <button class="primary-btn" style="width:auto;" onclick="createNewHouseholdFromSettings()">Create</button>
+                            </div>
+                        </div>
+                        <div style="background:white; padding:20px; border-radius:12px; border:1px solid var(--border);">
+                            <label>Join Existing (Paste Link or ID)</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="joinHouseholdId" placeholder="Paste ID or Link">
+                                <button class="outline" style="width:auto;" onclick="joinHouseholdFromSettings()">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="settingsAllNote" style="display:none; padding: 25px; background: var(--primary-light); color: var(--primary); border-radius: 12px; text-align:center; font-weight:700; margin-top:20px; border:1px solid var(--border);">
+                    Please select a specific Household from the top dropdown to manage its Categories, Budgets, and Members.
+                </div>
+
+                <div id="settingsContextBlock" class="grid-2">
                     <div class="card">
                         <h2 style="margin-top:0; color:var(--primary);">Category Configuration</h2>
-                        <p style="font-size:0.9em; color:var(--muted); margin-top:-10px; margin-bottom:20px;">Define categories, set spending limits, and trigger alerts when spending crosses your custom threshold.</p>
-                        
                         <div class="form-group">
                             <label>Total Household Monthly Budget (₹)</label>
                             <input type="number" id="monthlyBudget" placeholder="0.00" onblur="updateBudgets()">
                         </div>
-
                         <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-
                         <div style="display: flex; gap: 12px; margin-bottom: 25px;">
                             <input type="text" id="newCat" placeholder="New Category Name">
                             <button class="primary-btn" style="width: 120px;" onclick="addCategory()">Add</button>
@@ -346,7 +358,6 @@
                             <div id="memberListDisplay" style="margin-bottom: 25px;"></div>
                             <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                             <label>Add a Person Manually</label>
-                            <p style="font-size: 0.85em; color: var(--muted); margin-top:-5px; margin-bottom:15px;">Add offline members to track their splits.</p>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="manualMemberAdd" placeholder="e.g., Mom">
                                 <button class="primary-btn" style="width: auto; padding: 12px 24px;" onclick="addManualMember()">Add</button>
@@ -396,18 +407,19 @@
   messagingSenderId: "104147538477",
   appId: "1:104147538477:web:6c2d325232f92f2a325ea4",
   measurementId: "G-1JKSP8DMKP"
-};    
+};
+    
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // --- STATE CONFIGS ---
-    let urlParams = new URLSearchParams(window.location.search);
-    let dashboardId = urlParams.get('db');
+    // --- MULTI-TENANT STATE ---
     let myName = localStorage.getItem('domusOS_Name');
-    let savedDb = localStorage.getItem('domusOS_LastDB');
+    let dashboardsData = []; // Array of all fetched households
+    let activeData = null;   // Synthesized active view data
+    let currentViewId = localStorage.getItem('domusOS_LastView') || 'all';
+    let unsubscribes = [];
 
-    let appData = null;
     let chartPie = null, chartBar = null, comparativeChart = null;
 
     const today = new Date().toISOString().split('T')[0];
@@ -415,74 +427,129 @@
     document.getElementById('settleDate').value = today;
     document.getElementById('globalMonthFilter').value = today.substring(0, 7);
 
-    // --- BOOTSTRAPPING (NEW LOGIN SYSTEM) ---
-    window.addEventListener('DOMContentLoaded', async () => {
-        // Pre-fill name if known
-        if (myName) document.getElementById('userProfileName').value = myName;
+    function enterApp() {
+        const name = document.getElementById('userProfileName').value.trim();
+        if(!name) return alert("Please enter your name.");
+        localStorage.setItem('domusOS_Name', name);
+        myName = name;
+        bootDashboard();
+    }
 
-        if (dashboardId) {
-            // User landed on a specific invite link
-            localStorage.setItem('domusOS_LastDB', dashboardId); // Save for later
-            bootDashboard(); // Go straight in
+    // --- BOOTSTRAPPING ENGINE ---
+    window.addEventListener('DOMContentLoaded', async () => {
+        if (myName) {
+            bootDashboard();
         } else {
-            // User landed on the base URL (no ?db=)
             document.getElementById('viewLanding').style.display = 'flex';
-            
-            // If they have a saved database, show the Resume button
-            if (savedDb) {
-                document.getElementById('resumeContainer').style.display = 'block';
-            }
         }
     });
 
-    // --- LOGIN / CREATE ACTIONS ---
-    function resumeHousehold() {
-        const inputName = document.getElementById('userProfileName').value.trim();
-        if(!inputName) return alert("Please enter your name first.");
-        localStorage.setItem('domusOS_Name', inputName);
-        window.location.href = `?db=${savedDb}`;
-    }
+    function bootDashboard() {
+        document.getElementById('viewLanding').className = 'view-section'; 
+        document.getElementById('viewLanding').style.display = 'none';
+        document.getElementById('viewApp').style.display = 'flex';
+        document.getElementById('headerName').innerText = `👤 ${myName}`;
 
-    function loginToHousehold() {
-        const inputName = document.getElementById('userProfileName').value.trim();
-        if(!inputName) return alert("Please enter your name first.");
-        
-        let link = document.getElementById('loginLinkInput').value.trim();
-        if(!link) return alert("Please paste your invite link or ID.");
-        
-        localStorage.setItem('domusOS_Name', inputName);
-        
-        // Extract ID if they pasted a full URL
-        let dbId = link;
-        if(link.includes('?db=')) {
-            dbId = link.split('?db=')[1].split('&')[0];
+        // Clear existing listeners
+        unsubscribes.forEach(unsub => unsub());
+        unsubscribes = [];
+        dashboardsData = [];
+
+        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+
+        if (jHouseholds.length === 0) {
+            // No households joined yet. We fake an empty activeData to show the UI
+            activeData = { expenses: [], members: [myName], categories: [], categoryBudgets: {}, monthlyBudget: 0, householdName: 'Welcome to Domus' };
+            renderApp();
+            return;
         }
-        
-        window.location.href = `?db=${dbId}`;
+
+        jHouseholds.forEach(id => {
+            let unsub = db.collection('shared_dashboards').doc(id).onSnapshot(doc => {
+                if (doc.exists) {
+                    let data = { id: doc.id, ...doc.data() };
+                    // Auto-add member if missing
+                    if (!data.members.includes(myName)) {
+                        data.members.push(myName);
+                        db.collection('shared_dashboards').doc(id).set(data);
+                    }
+                    
+                    let idx = dashboardsData.findIndex(d => d.id === id);
+                    if (idx > -1) dashboardsData[idx] = data;
+                    else dashboardsData.push(data);
+                    
+                    synthesizeActiveData();
+                } else {
+                    // Document deleted
+                    jHouseholds = jHouseholds.filter(dbId => dbId !== id);
+                    localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+                    dashboardsData = dashboardsData.filter(d => d.id !== id);
+                    synthesizeActiveData();
+                }
+            });
+            unsubscribes.push(unsub);
+        });
     }
 
-    function processIdentityAndExecute(strategy) {
-        const inputName = document.getElementById('userProfileName').value.trim();
-        if(!inputName) return alert("Please enter your name.");
-        localStorage.setItem('domusOS_Name', inputName);
-        myName = inputName;
-
-        if (strategy === 'create') {
-            const hName = document.getElementById('householdNameInput').value.trim();
-            if(!hName) return alert("Please enter a Household name.");
-            createNewDashboard(hName);
+    function synthesizeActiveData() {
+        if (dashboardsData.length === 0) {
+            activeData = { expenses: [], members: [myName], categories: [], categoryBudgets: {}, monthlyBudget: 0, householdName: 'No Active Households' };
+            renderApp(); return;
         }
+
+        // Validate currentViewId
+        if (currentViewId !== 'all' && !dashboardsData.some(d => d.id === currentViewId)) {
+            currentViewId = 'all';
+            localStorage.setItem('domusOS_LastView', 'all');
+        }
+
+        if (currentViewId === 'all') {
+            activeData = { expenses: [], members: [], categories: [], categoryBudgets: {}, monthlyBudget: 0, householdName: 'All Households' };
+            let memberSet = new Set();
+            let catSet = new Set();
+            
+            dashboardsData.forEach(dbObj => {
+                (dbObj.expenses || []).forEach(ex => {
+                    activeData.expenses.push({ ...ex, dbId: dbObj.id, dbName: dbObj.householdName });
+                });
+                (dbObj.members || []).forEach(m => memberSet.add(m));
+                (dbObj.categories || []).forEach(c => catSet.add(c));
+                activeData.monthlyBudget += (dbObj.monthlyBudget || 0);
+                
+                Object.keys(dbObj.categoryBudgets || {}).forEach(cat => {
+                    if(!activeData.categoryBudgets[cat]) activeData.categoryBudgets[cat] = {limit: 0, alertAt: 0};
+                    let limit = typeof dbObj.categoryBudgets[cat] === 'number' ? dbObj.categoryBudgets[cat] : (dbObj.categoryBudgets[cat].limit || 0);
+                    let alertAt = typeof dbObj.categoryBudgets[cat] === 'number' ? dbObj.categoryBudgets[cat] : (dbObj.categoryBudgets[cat].alertAt || limit);
+                    activeData.categoryBudgets[cat].limit += limit;
+                    activeData.categoryBudgets[cat].alertAt += alertAt;
+                });
+            });
+            activeData.members = Array.from(memberSet);
+            activeData.categories = Array.from(catSet);
+        } else {
+            const targetDb = dashboardsData.find(d => d.id === currentViewId);
+            activeData = JSON.parse(JSON.stringify(targetDb));
+            activeData.expenses.forEach(ex => { ex.dbId = targetDb.id; ex.dbName = targetDb.householdName; });
+        }
+        renderApp();
     }
 
-    async function createNewDashboard(householdName) {
+    function switchContext(val) {
+        currentViewId = val;
+        localStorage.setItem('domusOS_LastView', val);
+        synthesizeActiveData();
+    }
+
+    // --- HOUSEHOLD MANAGEMENT (SETTINGS) ---
+    async function createNewHouseholdFromSettings() {
+        const hName = document.getElementById('newHouseholdName').value.trim();
+        if(!hName) return alert("Enter a name");
         const newId = db.collection('shared_dashboards').doc().id;
         const secureAdminToken = Math.random().toString(36).substring(2, 15);
-        localStorage.setItem('domusOS_AdminKey_' + newId, secureAdminToken);
-        localStorage.setItem('domusOS_LastDB', newId);
         
         await db.collection('shared_dashboards').doc(newId).set({
             created_at: Date.now(),
-            householdName: householdName,
+            householdName: hName,
             adminToken: secureAdminToken,
             adminProfileName: myName,
             members: [myName],
@@ -491,37 +558,40 @@
             expenses: [],
             monthlyBudget: 0
         });
-        window.location.href = `?db=${newId}`;
+        
+        document.getElementById('newHouseholdName').value = '';
+        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+        jHouseholds.push(newId);
+        localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+        
+        switchContext(newId);
+        bootDashboard(); // Reboot listeners
     }
 
-    function bootDashboard() {
-        document.getElementById('viewLanding').className = 'view-section'; 
-        document.getElementById('viewLanding').style.display = 'none';
-        document.getElementById('viewApp').style.display = 'flex';
-        document.getElementById('headerName').innerText = `👤 ${myName}`;
-
-        db.collection('shared_dashboards').doc(dashboardId).onSnapshot((doc) => {
-            if (doc.exists) {
-                appData = doc.data();
-                document.getElementById('sidebarHouseholdBadge').innerText = `${appData.householdName || 'Household'}`;
-                
-                const localAdminToken = localStorage.getItem('domusOS_AdminKey_' + dashboardId);
-                const isAdmin = (localAdminToken === appData.adminToken) || (appData.adminProfileName === myName);
-                document.getElementById('adminLinkContainer').style.display = isAdmin ? 'block' : 'none';
-                
-                if(!appData.members.includes(myName)) {
-                    appData.members.push(myName);
-                    syncToCloud();
-                } else { renderApp(); }
-            } else {
-                alert("Dashboard not found. It may have been deleted.");
-                localStorage.removeItem('domusOS_LastDB');
-                window.location.href = window.location.pathname; 
-            }
-        });
+    function joinHouseholdFromSettings() {
+        let inputId = document.getElementById('joinHouseholdId').value.trim();
+        if(!inputId) return alert("Paste link or ID");
+        if(inputId.includes('?db=')) inputId = inputId.split('?db=')[1].split('&')[0];
+        
+        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+        if (jHouseholds.includes(inputId)) return alert("You are already in this household.");
+        
+        jHouseholds.push(inputId);
+        localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+        document.getElementById('joinHouseholdId').value = '';
+        
+        switchContext(inputId);
+        bootDashboard(); // Reboot listeners
     }
 
-    function syncToCloud() { db.collection('shared_dashboards').doc(dashboardId).set(appData).catch(e => console.error("Cloud syncing failed:", e)); }
+    // --- SYNC HELPERS ---
+    function syncSpecificDb(dbId, updatedDbObj) {
+        if(!dbId) return;
+        // Strip the temporary dbId and dbName tags before saving
+        let cleanObj = JSON.parse(JSON.stringify(updatedDbObj));
+        cleanObj.expenses.forEach(ex => { delete ex.dbId; delete ex.dbName; });
+        db.collection('shared_dashboards').doc(dbId).set(cleanObj).catch(e => console.error(e));
+    }
 
     function nav(tabId) {
         document.querySelectorAll('.app-tab').forEach(el => el.style.display = 'none');
@@ -532,22 +602,29 @@
         document.getElementById('pageTitle').innerText = titles[tabId];
     }
     
-    function copyInviteLink() { navigator.clipboard.writeText(window.location.href); alert(`Invite link copied!`); }
+    function copyInviteLink() { 
+        if(currentViewId === 'all') return alert("Select a specific household from the dropdown first to copy its invite link.");
+        const link = window.location.origin + window.location.pathname + "?db=" + currentViewId;
+        navigator.clipboard.writeText(link); 
+        alert(`Invite link copied for ${activeData.householdName}!`); 
+    }
+    
     function clearFilter() { document.getElementById('globalMonthFilter').value = ''; renderApp(); }
     function getFilteredData() {
         const filter = document.getElementById('globalMonthFilter').value;
-        if (!filter) return appData.expenses;
-        return appData.expenses.filter(e => e.date.startsWith(filter));
+        if (!filter) return activeData.expenses;
+        return activeData.expenses.filter(e => e.date.startsWith(filter));
     }
 
     // --- MANUAL MEMBERS ---
     function addManualMember() {
         const name = document.getElementById('manualMemberAdd').value.trim();
         if(!name) return;
-        if(appData.members.includes(name)) return alert("Person already exists.");
-        appData.members.push(name);
+        if(activeData.members.includes(name)) return alert("Person already exists.");
+        let targetDb = dashboardsData.find(d => d.id === currentViewId);
+        targetDb.members.push(name);
         document.getElementById('manualMemberAdd').value = '';
-        syncToCloud();
+        syncSpecificDb(currentViewId, targetDb);
     }
 
     // --- UI CONTROLS ---
@@ -557,7 +634,15 @@
         const container = document.getElementById('customSplitInputs');
         if (type === 'custom') {
             ui.style.display = 'flex'; container.innerHTML = '';
-            appData.members.forEach(m => { 
+            
+            // Depends on the selected household
+            let targetMembers = activeData.members;
+            if(currentViewId === 'all') {
+                const targetDbId = document.getElementById('targetHouseholdSelect').value;
+                if(targetDbId) targetMembers = dashboardsData.find(d=>d.id===targetDbId).members;
+            }
+
+            targetMembers.forEach(m => { 
                 container.innerHTML += `
                 <div class="card" style="flex:1; min-width:200px; padding:15px; margin:0; box-shadow:none;">
                     <label style="text-transform:none; font-weight:700; color:var(--text);">${m}</label>
@@ -591,19 +676,24 @@
     // --- RECURRING EXPENSES ---
     function pullRecurringExpenses() {
         const currentMonth = document.getElementById('globalMonthFilter').value || new Date().toISOString().substring(0, 7);
-        const recurringList = appData.expenses.filter(e => e.isRecurring);
+        const recurringList = activeData.expenses.filter(e => e.isRecurring);
         let added = 0;
+        
+        // Loop through all recurring in active view
         recurringList.forEach(ex => {
-            const exists = appData.expenses.some(e => e.desc === ex.desc && e.date.startsWith(currentMonth) && e.id !== ex.id);
+            const exists = activeData.expenses.some(e => e.desc === ex.desc && e.date.startsWith(currentMonth) && e.id !== ex.id && e.dbId === ex.dbId);
             if(!exists) {
+                let targetDb = dashboardsData.find(d => d.id === ex.dbId);
                 let dupe = JSON.parse(JSON.stringify(ex));
+                delete dupe.dbId; delete dupe.dbName;
                 dupe.id = Date.now() + Math.random(); 
                 dupe.date = new Date().toISOString().split('T')[0]; 
-                appData.expenses.push(dupe);
+                targetDb.expenses.push(dupe);
+                syncSpecificDb(targetDb.id, targetDb);
                 added++;
             }
         });
-        if(added > 0) { syncToCloud(); alert(`Pulled ${added} recurring expenses for this month!`); }
+        if(added > 0) { alert(`Pulled ${added} recurring expenses for this month!`); }
         else { alert("No new recurring expenses to pull."); }
     }
 
@@ -618,15 +708,23 @@
         const payer = document.getElementById('payerSelect').value;
         const isRecurring = document.getElementById('isRecurring').checked;
         const fileInput = document.getElementById('receiptFile');
+        
+        let targetDbId = currentViewId;
+        if (currentViewId === 'all') {
+            targetDbId = document.getElementById('targetHouseholdSelect').value;
+        }
 
+        if(!targetDbId) return alert("Select a target household.");
         if(!date || !desc || !amount) return alert("Please fill out Date, Description, and Amount.");
+
+        let targetDb = dashboardsData.find(d => d.id === targetDbId);
 
         let shares = {};
         if (splitType === 'equal_all') {
-            const val = amount / appData.members.length;
-            appData.members.forEach(m => shares[m] = val);
+            const val = amount / targetDb.members.length;
+            targetDb.members.forEach(m => shares[m] = val);
         } else if (splitType === 'solo') {
-            appData.members.forEach(m => shares[m] = (m === payer) ? amount : 0);
+            targetDb.members.forEach(m => shares[m] = (m === payer) ? amount : 0);
         } else if (splitType === 'custom') {
             let totalAmt = 0;
             document.querySelectorAll('.custom-split-amt').forEach(input => {
@@ -645,18 +743,27 @@
             receiptUrl = await storageRef.getDownloadURL();
         }
 
-        const expenseObj = { id: id ? parseInt(id) : Date.now(), type: 'expense', date, desc, amount, cat, payer, shares, splitType, isRecurring, receiptUrl };
+        const expenseObj = { id: id ? parseFloat(id) : Date.now(), type: 'expense', date, desc, amount, cat, payer, shares, splitType, isRecurring, receiptUrl };
 
         if (id) {
-            const idx = appData.expenses.findIndex(e => e.id == id);
-            if(idx > -1) appData.expenses[idx] = expenseObj;
-        } else { appData.expenses.push(expenseObj); }
+            const idx = targetDb.expenses.findIndex(e => e.id == parseFloat(id));
+            if(idx > -1) targetDb.expenses[idx] = expenseObj;
+        } else { targetDb.expenses.push(expenseObj); }
         
-        syncToCloud(); clearForm();
+        syncSpecificDb(targetDbId, targetDb); 
+        clearForm();
     }
 
-    function editRecord(id) {
-        const ex = appData.expenses.find(e => e.id === id); if(!ex) return;
+    function editRecord(id, originDbId) {
+        const targetDb = dashboardsData.find(d => d.id === originDbId);
+        const ex = targetDb.expenses.find(e => e.id == id); if(!ex) return;
+        
+        if (currentViewId === 'all') {
+            document.getElementById('targetHouseholdSelect').value = originDbId;
+            document.getElementById('targetHouseholdSelect').disabled = true;
+            populatePayerAndCategoryForDB(originDbId);
+        }
+
         document.getElementById('editId').value = ex.id; document.getElementById('dateInput').value = ex.date;
         document.getElementById('amount').value = ex.amount; document.getElementById('desc').value = ex.desc;
         document.getElementById('categorySelect').value = ex.cat; document.getElementById('payerSelect').value = ex.payer;
@@ -681,93 +788,175 @@
         document.getElementById('editId').value = ''; document.getElementById('desc').value = ''; document.getElementById('amount').value = '';
         document.getElementById('receiptFile').value = ''; document.getElementById('isRecurring').checked = false;
         document.getElementById('entryFormCard').dataset.receiptUrl = "";
-        document.getElementById('splitType').value = 'equal_all'; toggleSplit();
+        document.getElementById('splitType').value = 'equal_all'; 
+        
+        if(currentViewId === 'all') {
+            document.getElementById('targetHouseholdSelect').disabled = false;
+            populatePayerAndCategoryForDB(document.getElementById('targetHouseholdSelect').value);
+        }
+        toggleSplit();
         document.getElementById('formTitle').innerText = 'Log an Expense';
         document.getElementById('submitBtn').innerText = 'Save Expense'; 
         document.getElementById('cancelEditBtn').style.display = 'none';
     }
 
-    function deleteRecord(id) {
+    function deleteRecord(id, originDbId) {
         if(confirm("Delete this expense permanently?")) { 
-            appData.expenses = appData.expenses.filter(e => e.id !== id); 
-            clearForm(); syncToCloud(); 
+            let targetDb = dashboardsData.find(d => d.id === originDbId);
+            targetDb.expenses = targetDb.expenses.filter(e => e.id != id); 
+            clearForm(); syncSpecificDb(originDbId, targetDb); 
         }
     }
 
     function addSettlement() {
+        let targetDbId = currentViewId;
+        if (currentViewId === 'all') targetDbId = document.getElementById('settleHouseholdSelect').value;
+        if(!targetDbId) return alert("Select a target household.");
+
+        let targetDb = dashboardsData.find(d => d.id === targetDbId);
+
         const date = document.getElementById('settleDate').value; const amount = parseFloat(document.getElementById('settleAmount').value);
         const sender = document.getElementById('settleSender').value; const receiver = document.getElementById('settleReceiver').value;
         if(!date || !amount) return alert("Verify fields.");
         if(sender === receiver) return alert("Sender and receiver cannot be the same.");
         
-        appData.expenses.push({ id: Date.now(), type: 'settlement', date, desc: `Payment: ${sender} paid ${receiver}`, amount, cat: 'Settlement', sender, receiver });
-        document.getElementById('settleAmount').value = ''; syncToCloud(); nav('analytics');
+        targetDb.expenses.push({ id: Date.now(), type: 'settlement', date, desc: `Payment: ${sender} paid ${receiver}`, amount, cat: 'Settlement', sender, receiver });
+        document.getElementById('settleAmount').value = ''; syncSpecificDb(targetDbId, targetDb); nav('analytics');
+    }
+
+    // --- HELPER FOR DROPDOWNS ---
+    function populatePayerAndCategoryForDB(dbId) {
+        if(!dbId) return;
+        const targetDb = dashboardsData.find(d => d.id === dbId);
+        
+        const catSelect = document.getElementById('categorySelect'); 
+        catSelect.innerHTML = '';
+        targetDb.categories.forEach(c => { if(c !== 'Settlement') catSelect.innerHTML += `<option value="${c}">${c}</option>`; });
+
+        const pSelect = document.getElementById('payerSelect'); 
+        const sSend = document.getElementById('settleSender'); const sRec = document.getElementById('settleReceiver');
+        pSelect.innerHTML = ''; if(sSend) sSend.innerHTML = ''; if(sRec) sRec.innerHTML = ''; 
+        
+        targetDb.members.forEach(m => {
+            pSelect.innerHTML += `<option value="${m}">${m} ${m===myName?'(You)':''}</option>`;
+            if(sSend) sSend.innerHTML += `<option value="${m}">${m}</option>`;
+            if(sRec) sRec.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        if(targetDb.members.includes(myName)) { pSelect.value = myName; if(sSend) sSend.value = myName; }
+        
+        toggleSplit();
     }
 
     // --- SETTINGS & BUDGETS ---
     function updateBudgets() {
-        appData.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0;
-        if(!appData.categoryBudgets) appData.categoryBudgets = {};
+        let targetDb = dashboardsData.find(d => d.id === currentViewId);
+        targetDb.monthlyBudget = parseFloat(document.getElementById('monthlyBudget').value) || 0;
+        if(!targetDb.categoryBudgets) targetDb.categoryBudgets = {};
+        
         document.querySelectorAll('.cat-budget-row').forEach(row => {
             const cat = row.dataset.cat;
             const limit = parseFloat(row.querySelector('.cat-limit-input').value) || 0;
             const alertAt = parseFloat(row.querySelector('.cat-alert-input').value) || 0;
-            if(limit > 0) { appData.categoryBudgets[cat] = { limit: limit, alertAt: alertAt }; } 
-            else { delete appData.categoryBudgets[cat]; }
+            if(limit > 0) { targetDb.categoryBudgets[cat] = { limit: limit, alertAt: alertAt }; } 
+            else { delete targetDb.categoryBudgets[cat]; }
         });
-        syncToCloud();
+        syncSpecificDb(currentViewId, targetDb);
     }
     
-    function addCategory() { const val = document.getElementById('newCat').value.trim(); if(val && !appData.categories.includes(val)) { appData.categories.push(val); document.getElementById('newCat').value = ''; syncToCloud(); } }
-    function removeCategory(cat) { if(cat==="Settlement") return; appData.categories = appData.categories.filter(c => c !== cat); syncToCloud(); }
-    function factoryReset() { if(confirm("WARNING: This deletes the dashboard for everyone.")) { db.collection('shared_dashboards').doc(dashboardId).delete().then(() => { localStorage.removeItem('domusOS_LastDB'); window.location.href = window.location.pathname; }); } }
+    function addCategory() { 
+        const val = document.getElementById('newCat').value.trim(); 
+        let targetDb = dashboardsData.find(d => d.id === currentViewId);
+        if(val && !targetDb.categories.includes(val)) { targetDb.categories.push(val); document.getElementById('newCat').value = ''; syncSpecificDb(currentViewId, targetDb); } 
+    }
+    function removeCategory(cat) { 
+        if(cat==="Settlement") return; 
+        let targetDb = dashboardsData.find(d => d.id === currentViewId);
+        targetDb.categories = targetDb.categories.filter(c => c !== cat); 
+        syncSpecificDb(currentViewId, targetDb); 
+    }
+    function factoryReset() { 
+        if(confirm(`WARNING: This deletes the ${activeData.householdName} dashboard for EVERYONE.`)) { 
+            db.collection('shared_dashboards').doc(currentViewId).delete().then(() => { 
+                let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+                jHouseholds = jHouseholds.filter(id => id !== currentViewId);
+                localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+                localStorage.setItem('domusOS_LastView', 'all');
+                window.location.href = window.location.pathname; 
+            }); 
+        } 
+    }
 
     // --- RENDER ENGINE ---
     function renderApp() {
-        if(!appData) return;
-        document.getElementById('monthlyBudget').value = appData.monthlyBudget || '';
-        if(!appData.categoryBudgets) appData.categoryBudgets = {};
-        
-        const catSelect = document.getElementById('categorySelect'); 
-        const catBudgetList = document.getElementById('categoryBudgetList');
-        const mList = document.getElementById('memberListDisplay');
-        
-        catSelect.innerHTML = ''; catBudgetList.innerHTML = ''; mList.innerHTML = '';
-        
-        appData.categories.forEach(c => {
-            if(c !== 'Settlement') {
-                catSelect.innerHTML += `<option value="${c}">${c}</option>`;
-                let limit = 0, alertAt = 0;
-                
-                if(typeof appData.categoryBudgets[c] === 'number') { limit = appData.categoryBudgets[c]; alertAt = limit; } 
-                else if (appData.categoryBudgets[c]) { limit = appData.categoryBudgets[c].limit || 0; alertAt = appData.categoryBudgets[c].alertAt || limit; }
-                
-                catBudgetList.innerHTML += `
-                <div class="cat-budget-row" data-cat="${c}" style="display:flex; flex-direction:column; background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
-                        <span style="font-weight:700; color:var(--text); font-size:1.1em;">${c}</span>
-                        <button class="outline" style="width:auto; padding:6px 12px; font-size:0.8em; color:var(--danger); border-color:var(--danger);" onclick="removeCategory('${c}')">Remove</button>
-                    </div>
-                    <div class="grid-2" style="gap:15px;">
-                        <div><label style="font-size:0.8em;">Budget Limit (₹)</label><input type="number" class="cat-limit-input" value="${limit || ''}" placeholder="0" onblur="updateBudgets()" style="background:white;"></div>
-                        <div><label style="font-size:0.8em;">Alert Threshold (₹)</label><input type="number" class="cat-alert-input" value="${alertAt || ''}" placeholder="0" onblur="updateBudgets()" style="background:white;"></div>
-                    </div>
-                </div>`;
-            }
-        });
+        if(!activeData) return;
 
-        const pSelect = document.getElementById('payerSelect'); const sSend = document.getElementById('settleSender'); const sRec = document.getElementById('settleReceiver');
-        pSelect.innerHTML = ''; sSend.innerHTML = ''; sRec.innerHTML = ''; 
-        
-        appData.members.forEach(m => {
-            const mIsAdmin = (m === appData.adminProfileName);
-            const badge = mIsAdmin ? ' <span title="Admin" style="color:var(--secondary); font-size:1.1em; line-height:1;">✦</span>' : '';
-            pSelect.innerHTML += `<option value="${m}">${m} ${m===myName?'(You)':''}</option>`;
-            sSend.innerHTML += `<option value="${m}">${m}</option>`;
-            sRec.innerHTML += `<option value="${m}">${m}</option>`;
-            mList.innerHTML += `<span class="badge" style="display:inline-flex; align-items:center; gap:4px;">${m}${badge}</span>`;
-        });
-        if(appData.members.includes(myName)) { pSelect.value = myName; sSend.value = myName; }
+        // Context Selector Population
+        const cSel = document.getElementById('contextSelector');
+        cSel.innerHTML = `<option value="all">🌐 All Households (Cumulative)</option>`;
+        dashboardsData.forEach(d => { cSel.innerHTML += `<option value="${d.id}">${d.householdName}</option>`; });
+        cSel.value = currentViewId;
+
+        // Conditional UI for 'all' vs 'specific'
+        if (currentViewId === 'all') {
+            document.getElementById('adminLinkContainer').style.display = 'none';
+            document.getElementById('settingsContextBlock').style.display = 'none';
+            document.getElementById('settingsAllNote').style.display = 'block';
+            document.getElementById('targetHouseholdGroup').style.display = 'block';
+            document.getElementById('settleHouseholdGroup').style.display = 'block';
+            
+            const tSel = document.getElementById('targetHouseholdSelect');
+            const stSel = document.getElementById('settleHouseholdSelect');
+            tSel.innerHTML = ''; stSel.innerHTML = '';
+            dashboardsData.forEach(d => { 
+                tSel.innerHTML += `<option value="${d.id}">${d.householdName}</option>`; 
+                stSel.innerHTML += `<option value="${d.id}">${d.householdName}</option>`;
+            });
+            
+            tSel.onchange = () => populatePayerAndCategoryForDB(tSel.value);
+            stSel.onchange = () => populatePayerAndCategoryForDB(stSel.value);
+            
+            populatePayerAndCategoryForDB(tSel.value);
+        } else {
+            const mIsAdmin = (activeData.adminProfileName === myName);
+            document.getElementById('adminLinkContainer').style.display = mIsAdmin ? 'block' : 'none';
+            document.getElementById('settingsContextBlock').style.display = 'grid';
+            document.getElementById('settingsAllNote').style.display = 'none';
+            document.getElementById('targetHouseholdGroup').style.display = 'none';
+            document.getElementById('settleHouseholdGroup').style.display = 'none';
+            
+            populatePayerAndCategoryForDB(currentViewId);
+
+            document.getElementById('monthlyBudget').value = activeData.monthlyBudget || '';
+            const catBudgetList = document.getElementById('categoryBudgetList');
+            const mList = document.getElementById('memberListDisplay');
+            catBudgetList.innerHTML = ''; mList.innerHTML = '';
+            
+            activeData.categories.forEach(c => {
+                if(c !== 'Settlement') {
+                    let limit = 0, alertAt = 0;
+                    if(typeof activeData.categoryBudgets[c] === 'number') { limit = activeData.categoryBudgets[c]; alertAt = limit; } 
+                    else if (activeData.categoryBudgets[c]) { limit = activeData.categoryBudgets[c].limit || 0; alertAt = activeData.categoryBudgets[c].alertAt || limit; }
+                    
+                    catBudgetList.innerHTML += `
+                    <div class="cat-budget-row" data-cat="${c}" style="display:flex; flex-direction:column; background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                            <span style="font-weight:700; color:var(--text); font-size:1.1em;">${c}</span>
+                            <button class="outline" style="width:auto; padding:6px 12px; font-size:0.8em; color:var(--danger); border-color:var(--danger);" onclick="removeCategory('${c}')">Remove</button>
+                        </div>
+                        <div class="grid-2" style="gap:15px;">
+                            <div><label style="font-size:0.8em;">Budget Limit (₹)</label><input type="number" class="cat-limit-input" value="${limit || ''}" placeholder="0" onblur="updateBudgets()" style="background:white;"></div>
+                            <div><label style="font-size:0.8em;">Alert Threshold (₹)</label><input type="number" class="cat-alert-input" value="${alertAt || ''}" placeholder="0" onblur="updateBudgets()" style="background:white;"></div>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            activeData.members.forEach(m => {
+                const isAdmin = (m === activeData.adminProfileName);
+                const badge = isAdmin ? ' <span title="Admin" style="color:var(--secondary); font-size:1.1em; line-height:1;">✦</span>' : '';
+                mList.innerHTML += `<span class="badge" style="display:inline-flex; align-items:center; gap:4px;">${m}${badge}</span>`;
+            });
+        }
 
         document.getElementById('periodText').innerText = document.getElementById('globalMonthFilter').value ? `(${document.getElementById('globalMonthFilter').value})` : '(All-Time)';
         renderTable(); renderAnalytics();
@@ -783,14 +972,16 @@
             const isSettlement = ex.type === 'settlement';
             let payerStr = isSettlement ? ex.sender : ex.payer;
             
-            let actions = `<button class="action-icon" title="Delete" onclick="deleteRecord(${ex.id})">🗑️</button>`;
-            if (!isSettlement) actions = `<button class="action-icon" title="Edit" onclick="editRecord(${ex.id})">✏️</button>` + actions;
+            let actions = `<button class="action-icon" title="Delete" onclick="deleteRecord(${ex.id}, '${ex.dbId}')">🗑️</button>`;
+            if (!isSettlement) actions = `<button class="action-icon" title="Edit" onclick="editRecord(${ex.id}, '${ex.dbId}')">✏️</button>` + actions;
             
             let receiptIcon = ex.receiptUrl ? `<a href="${ex.receiptUrl}" target="_blank" style="text-decoration:none;" title="View Receipt">📎</a>` : '';
             let recurringIcon = ex.isRecurring ? `<span title="Recurring" style="font-size:0.8em; margin-left:5px;">🔁</span>` : '';
+            let dbTag = currentViewId === 'all' ? `<span style="font-size:0.7em; color:white; background:var(--primary); padding:2px 6px; border-radius:4px;">${ex.dbName}</span>` : '';
 
             tbody.innerHTML += `<tr class="${isSettlement ? 'row-settlement' : ''}">
                 <td style="font-size:0.9em; color:var(--muted); font-weight:500;">${ex.date}</td>
+                <td>${dbTag}</td>
                 <td style="font-weight:600; color:var(--text);">${ex.desc} ${receiptIcon} ${recurringIcon}<br><span style="font-size:0.75em; color:var(--primary); font-weight:700;">${ex.cat}</span></td>
                 <td><span class="badge" style="margin:0;">${payerStr}</span></td>
                 <td style="font-weight:800; color:var(--primary);">₹${ex.amount.toLocaleString('en-IN')}</td>
@@ -800,9 +991,9 @@
     }
 
     function renderAnalytics() {
-        const fData = getFilteredData(); const allData = appData.expenses;
+        const fData = getFilteredData(); const allData = activeData.expenses;
         let balances = {}; let allTimeBalances = {};
-        appData.members.forEach(m => { balances[m] = { paid:0, liability:0 }; allTimeBalances[m] = { paid:0, liability:0 }; });
+        activeData.members.forEach(m => { balances[m] = { paid:0, liability:0 }; allTimeBalances[m] = { paid:0, liability:0 }; });
         const catData = {};
 
         fData.forEach(ex => {
@@ -818,15 +1009,15 @@
                 if(allTimeBalances[ex.payer]) allTimeBalances[ex.payer].paid += ex.amount;
                 Object.keys(ex.shares).forEach(m => { if(allTimeBalances[m]) allTimeBalances[m].liability += ex.shares[m]; });
             } else if (ex.type === 'settlement') {
-                allTimeBalances[ex.sender].paid += ex.amount;      
-                allTimeBalances[ex.receiver].liability += ex.amount; 
+                if(allTimeBalances[ex.sender]) allTimeBalances[ex.sender].paid += ex.amount;      
+                if(allTimeBalances[ex.receiver]) allTimeBalances[ex.receiver].liability += ex.amount; 
             }
         });
 
         const grid = document.getElementById('analyticsGrid'); grid.innerHTML = '';
         let settlementLogic = [];
 
-        appData.members.forEach(m => {
+        activeData.members.forEach(m => {
             grid.innerHTML += `<div class="stat-card"><strong style="font-size:1.2em; color:var(--primary);">${m}</strong><hr style="border:0; border-top:1px solid var(--border); margin:15px 0;"><p style="font-size:0.8em; color:var(--muted); margin:0 0 5px 0; font-weight:700;">Total Paid</p><strong style="color:var(--success); font-size:1.4em;">₹${balances[m].paid.toLocaleString('en-IN', {maximumFractionDigits:0})}</strong><p style="font-size:0.8em; color:var(--muted); margin:15px 0 5px 0; font-weight:700;">Their Share</p><strong style="color:var(--danger); font-size:1.4em;">₹${balances[m].liability.toLocaleString('en-IN', {maximumFractionDigits:0})}</strong></div>`;
             const net = allTimeBalances[m].paid - allTimeBalances[m].liability;
             if(Math.abs(net) > 1) settlementLogic.push({ name: m, net: net });
@@ -842,7 +1033,7 @@
         }
 
         // Global Budget Pacing UI
-        const budget = appData.monthlyBudget || 0;
+        const budget = activeData.monthlyBudget || 0;
         const pacingUI = document.getElementById('pacingUI');
         const filterMonth = document.getElementById('globalMonthFilter').value || new Date().toISOString().substring(0, 7);
         const spentThisMonth = allData.filter(e => e.date.startsWith(filterMonth) && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
@@ -865,14 +1056,14 @@
             `;
         } else { pacingUI.innerHTML = `<p style="color:var(--muted); font-size:0.9em; text-align:center;">Set a global monthly budget in Settings to see pacing insights.</p>`; }
 
-        // Category Pacing UI (Custom Dual Logic)
+        // Category Pacing UI
         const catPacingUI = document.getElementById('categoryPacingUI');
         catPacingUI.innerHTML = '';
-        if(appData.categoryBudgets && Object.keys(appData.categoryBudgets).length > 0) {
-            Object.keys(appData.categoryBudgets).forEach(cat => {
+        if(activeData.categoryBudgets && Object.keys(activeData.categoryBudgets).length > 0) {
+            Object.keys(activeData.categoryBudgets).forEach(cat => {
                 let limit = 0, alertAt = 0;
-                if(typeof appData.categoryBudgets[cat] === 'number') { limit = appData.categoryBudgets[cat]; alertAt = limit; } 
-                else { limit = appData.categoryBudgets[cat].limit || 0; alertAt = appData.categoryBudgets[cat].alertAt || limit; }
+                if(typeof activeData.categoryBudgets[cat] === 'number') { limit = activeData.categoryBudgets[cat]; alertAt = limit; } 
+                else { limit = activeData.categoryBudgets[cat].limit || 0; alertAt = activeData.categoryBudgets[cat].alertAt || limit; }
                 
                 const spent = fData.filter(e => e.type === 'expense' && e.cat === cat).reduce((a,c) => a + c.amount, 0);
                 const actualBurn = limit > 0 ? (spent / limit) * 100 : 0;
@@ -894,9 +1085,9 @@
         if (chartPie) chartPie.destroy();
         if (Object.keys(catData).length > 0) { chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#334E68', '#F4A261', '#2a9d8f', '#e63946', '#f4a261', '#829AB1'], borderWidth:0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins:{legend:{position:'right', labels:{font:{family:'Inter', size:11}}}} } }); }
         
-        // Bar Chart (Net Balances ONLY)
+        // Bar Chart (Net Balances)
         if (chartBar) chartBar.destroy();
-        const labelsBar = appData.members; 
+        const labelsBar = activeData.members; 
         const netBalances = labelsBar.map(m => allTimeBalances[m].paid - allTimeBalances[m].liability);
         chartBar = new Chart(document.getElementById('barChart').getContext('2d'), { 
             type: 'bar', 
@@ -917,7 +1108,7 @@
         });
 
         const sortedKeys = Object.keys(compData).sort();
-        const displayKeys = compType === 'month' ? sortedKeys.slice(-12) : sortedKeys; // Last 12 months max
+        const displayKeys = compType === 'month' ? sortedKeys.slice(-12) : sortedKeys; 
         const displayValues = displayKeys.map(k => compData[k]);
 
         comparativeChart = new Chart(document.getElementById('comparativeChart').getContext('2d'), {
@@ -944,16 +1135,16 @@
     }
 
     function exportCSV() {
-        if(appData.expenses.length === 0) return alert("No data to export.");
-        let csv = `Date,Type,Description,Category,Who Paid,Amount\n`;
-        appData.expenses.forEach(ex => {
+        if(activeData.expenses.length === 0) return alert("No data to export.");
+        let csv = `Date,Household,Type,Description,Category,Who Paid,Amount\n`;
+        activeData.expenses.forEach(ex => {
             let payerStr = ex.type === 'settlement' ? ex.sender : ex.payer;
-            csv += `"${ex.date}","${ex.type}","${ex.desc}","${ex.cat}","${payerStr}",${ex.amount}\n`;
+            csv += `"${ex.date}","${ex.dbName}","${ex.type}","${ex.desc}","${ex.cat}","${payerStr}",${ex.amount}\n`;
         });
-        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Household_Finance_Export.csv`; a.click();
+        const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Domus_Finance_Export.csv`; a.click();
     }
 
-    // --- ASK DOMUS AGENT (SMART AI ENGINE) ---
+    // --- ASK DOMUS AGENT ---
     function toggleChat() { 
         document.getElementById('chatbotMain').classList.toggle('collapsed'); 
         document.getElementById('chatToggleIcon').innerText = document.getElementById('chatbotMain').classList.contains('collapsed') ? '▲' : '▼'; 
@@ -971,20 +1162,18 @@
             const fData = getFilteredData();
             let responded = false;
 
-            // 1. Full Dashboard Summary
             if (q.includes('summary') || q.includes('report') || q.includes('audit')) {
                 const total = fData.filter(e => e.type === 'expense').reduce((a,c) => a + c.amount, 0);
                 let highestSpender = "N/A"; let maxSpend = 0;
-                let balances = {}; appData.members.forEach(m => balances[m] = 0);
+                let balances = {}; activeData.members.forEach(m => balances[m] = 0);
                 fData.filter(e => e.type === 'expense').forEach(e => { if(balances[e.payer] !== undefined) balances[e.payer] += e.amount; });
                 Object.keys(balances).forEach(m => { if(balances[m] > maxSpend) { maxSpend = balances[m]; highestSpender = m; } });
                 
                 res = `<strong>Dashboard Summary:</strong><br>• Total Spent: ₹${total.toLocaleString('en-IN')}<br>• Top Payer: ${highestSpender} (₹${maxSpend.toLocaleString('en-IN')})<br>• Current Status: ${document.getElementById('settlementText').innerText}`;
                 responded = true;
             }
-            // 2. Specific Member Check
-            else if (!responded && appData.members.some(m => q.includes(m.toLowerCase()))) {
-                appData.members.forEach(m => {
+            else if (!responded && activeData.members.some(m => q.includes(m.toLowerCase()))) {
+                activeData.members.forEach(m => {
                     if(q.includes(m.toLowerCase())) {
                         const paid = fData.filter(e => e.type==='expense' && e.payer===m).reduce((a,c)=>a+c.amount,0);
                         res = `<strong>${m}</strong> has paid a gross total of <strong>₹${paid.toLocaleString('en-IN')}</strong> for the current filtered period.`;
@@ -992,7 +1181,6 @@
                     }
                 });
             }
-            // 3. Mathematical Queries
             if(!responded) {
                 if (q.includes('largest') || q.includes('biggest') || q.includes('most expensive')) {
                     const maxEx = fData.filter(e => e.type === 'expense').reduce((max, ex) => ex.amount > (max ? max.amount : 0) ? ex : max, null);
@@ -1000,15 +1188,15 @@
                     else res = "No expenses logged for this period.";
                 } 
                 else if (q.includes('who spent the most') || q.includes('top spender')) {
-                    let balances = {}; appData.members.forEach(m => balances[m] = 0);
-                    appData.expenses.filter(e => e.type === 'expense').forEach(e => { if(balances[e.payer] !== undefined) balances[e.payer] += e.amount; });
+                    let balances = {}; activeData.members.forEach(m => balances[m] = 0);
+                    activeData.expenses.filter(e => e.type === 'expense').forEach(e => { if(balances[e.payer] !== undefined) balances[e.payer] += e.amount; });
                     let topSpender = Object.keys(balances).reduce((a, b) => balances[a] > balances[b] ? a : b);
                     res = `<strong>${topSpender}</strong> has deployed the most capital upfront, paying <strong>₹${balances[topSpender].toLocaleString('en-IN')}</strong> in total across all time.`;
                 }
                 else if (q.includes('over budget') || q.includes('alert') || q.includes('warning') || q.includes('threshold')) {
                     let alerts = [];
-                    Object.keys(appData.categoryBudgets || {}).forEach(c => {
-                        let alertAt = typeof appData.categoryBudgets[c] === 'number' ? appData.categoryBudgets[c] : (appData.categoryBudgets[c].alertAt || 0);
+                    Object.keys(activeData.categoryBudgets || {}).forEach(c => {
+                        let alertAt = typeof activeData.categoryBudgets[c] === 'number' ? activeData.categoryBudgets[c] : (activeData.categoryBudgets[c].alertAt || 0);
                         const spent = fData.filter(e => e.cat === c && e.type === 'expense').reduce((a,e) => a+e.amount, 0);
                         if(alertAt > 0 && spent >= alertAt) alerts.push(`<strong>${c}</strong>`);
                     });
@@ -1026,7 +1214,7 @@
                     const total = fData.filter(e => e.type === 'expense').reduce((a,c) => a + c.amount, 0);
                     res = `Total expenses for this period are <strong>₹${total.toLocaleString('en-IN')}</strong>.`;
                 } else {
-                    const match = appData.categories.find(c => q.includes(c.toLowerCase()));
+                    const match = activeData.categories.find(c => q.includes(c.toLowerCase()));
                     if(match) {
                         const spent = fData.filter(e => e.cat === match && e.type === 'expense').reduce((a,c) => a + c.amount, 0);
                         res = `You have spent <strong>₹${spent.toLocaleString('en-IN')}</strong> on <strong>${match}</strong> this period.`;
