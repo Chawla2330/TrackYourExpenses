@@ -10,27 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-    <script>
-        // INSTANT MEMORY REDIRECT ENGINE
-        let urlParams = new URLSearchParams(window.location.search);
-        let currentDb = urlParams.get('db');
-        let joinedHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
-        
-        // If user hits base URL but has joined households, auto-load their last view
-        if (!currentDb && joinedHouseholds.length > 0) {
-            let lastView = localStorage.getItem('domusOS_LastView');
-            if(lastView && lastView !== 'all') {
-                window.location.replace("?db=" + lastView);
-            }
-        }
-        
-        // If a new link is opened, ensure it gets saved to their array
-        if (currentDb && !joinedHouseholds.includes(currentDb)) {
-            joinedHouseholds.push(currentDb);
-            localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(joinedHouseholds));
-        }
-    </script>
-
     <style>
         /* Domus Official Color Palette */
         :root { 
@@ -56,10 +35,11 @@
         .view-section.active { display: flex; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Setup UI */
-        .landing-container { max-width: 450px; margin: auto; background: var(--card); padding: 50px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
+        /* Setup UI - Upgraded with Login Portal */
+        .landing-container { max-width: 500px; margin: auto; background: var(--card); padding: 40px 40px; border-radius: var(--radius); box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08); text-align: center; border: 1px solid var(--border); }
         .landing-container h1 { color: var(--primary); margin-top: 0; font-size: 2.6em; font-weight: 800; letter-spacing: -1px; }
-        .landing-container p { color: var(--muted); line-height: 1.6; margin-bottom: 35px; font-size: 1.05em; }
+        .landing-container p { color: var(--muted); line-height: 1.5; margin-bottom: 25px; font-size: 1em; }
+        .portal-box { background: #F0F4F8; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
 
         /* App Layout */
         #sidebar { background: var(--primary); width: 280px; display: flex; flex-direction: column; padding: 25px 0; z-index: 100; justify-content: space-between; }
@@ -73,12 +53,12 @@
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 25px; }
         @media(min-width: 992px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
         
-        .form-group { margin-bottom: 24px; text-align: left; }
-        label { display: block; font-size: 0.9em; font-weight: 700; margin-bottom: 10px; color: var(--primary); }
-        input, select { width: 100%; padding: 16px 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; background: #F0F4F8; transition: 0.2s; color: var(--text); }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 0.9em; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+        input, select { width: 100%; padding: 14px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; background: #F0F4F8; transition: 0.2s; color: var(--text); }
         input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); background: white; }
         
-        button { background: var(--secondary); color: var(--text); border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; font-size: 16px; transition: 0.2s; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(244, 162, 97, 0.2); }
+        button { background: var(--secondary); color: var(--text); border: none; padding: 14px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; font-size: 15px; transition: 0.2s; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(244, 162, 97, 0.2); }
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(244, 162, 97, 0.35); filter: brightness(1.05); }
         button.primary-btn { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(51, 78, 104, 0.2); }
         button.primary-btn:hover { box-shadow: 0 6px 15px rgba(51, 78, 104, 0.3); }
@@ -89,7 +69,7 @@
         .stat-card { background: white; border: 1px solid var(--border); padding: 25px; border-radius: 14px; text-align: center; }
         .master-balance { background: var(--primary); color: white; padding: 40px; border-radius: var(--radius); text-align: center; box-shadow: 0 10px 25px rgba(51, 78, 104, 0.2); }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.95em; min-width: 700px; }
         th, td { padding: 18px 12px; border-bottom: 1px solid var(--border); text-align: left; }
         th { color: var(--muted); font-weight: 700; font-size: 0.85em; background: #F0F4F8; text-transform: uppercase; letter-spacing: 0.5px; }
         .row-settlement { background-color: rgba(42, 157, 143, 0.05); }
@@ -105,9 +85,26 @@
             #main-content { padding: 15px; padding-bottom: 100px; }
         }
 
-        /* Ask Domus Agent */
-        .chatbot { position: fixed; bottom: 0; right: 30px; width: 360px; background: white; border-radius: 16px 16px 0 0; box-shadow: 0 -5px 25px rgba(16, 42, 67, 0.15); border: 1px solid var(--border); border-bottom: none; z-index: 999; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: translateY(0); }
-        .chatbot.collapsed { transform: translateY(calc(100% - 60px)); }
+        /* Ask Domus Agent - DOCKED TO BOTTOM */
+        .chatbot { 
+            position: fixed; 
+            bottom: 0; 
+            right: 30px; 
+            width: 360px; 
+            background: white; 
+            border-radius: 16px 16px 0 0; 
+            box-shadow: 0 -5px 25px rgba(16, 42, 67, 0.15); 
+            border: 1px solid var(--border); 
+            border-bottom: none;
+            z-index: 999; 
+            display: flex; 
+            flex-direction: column; 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            transform: translateY(0); 
+        }
+        .chatbot.collapsed { 
+            transform: translateY(calc(100% - 60px)); 
+        }
         @media (max-width: 768px) { .chatbot { width: 90%; right: 5%; bottom: 75px; border-radius: 16px; border-bottom: 1px solid var(--border); } .chatbot.collapsed { transform: translateY(calc(100% - 60px)); } }
         
         .chat-head { background: var(--primary); color: white; padding: 18px 24px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; height: 60px; }
@@ -122,18 +119,47 @@
 </head>
 <body>
 
-<!-- SETUP / LANDING -->
+<!-- SETUP / LANDING LOGIN PORTAL -->
 <div id="viewLanding" class="view-section active" style="align-items:center; justify-content:center;">
     <div class="landing-container">
         <h1>Domus.</h1>
-        <p>The structured, calm, and collaborative way to manage household finances, share bills, and monitor budgets.</p>
+        <p>The structured, calm, and collaborative way to manage household finances and monitor budgets.</p>
         
-        <div class="form-group" style="margin-bottom: 30px;">
+        <div class="form-group" style="margin-bottom: 25px;">
             <label>What's your name?</label>
             <input type="text" id="userProfileName" placeholder="e.g., Sarah" style="background: white;">
         </div>
-        
-        <button class="primary-btn" onclick="enterApp()">Enter Domus</button>
+
+        <!-- DUAL LOGIN / CREATE PORTAL -->
+        <div id="authActionsContainer">
+            
+            <!-- Create New -->
+            <div class="portal-box">
+                <h3 style="margin-top:0; color:var(--primary); font-size: 1.1em; margin-bottom: 15px;">Create a New Household</h3>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="text" id="householdNameInput" placeholder="e.g., The Watson Home" style="background: white;">
+                </div>
+                <button class="primary-btn" onclick="processIdentityAndExecute('create')">Create Dashboard</button>
+            </div>
+
+            <div style="font-weight:700; color:var(--muted); margin: 20px 0;">— OR —</div>
+
+            <!-- Login to Existing -->
+            <div class="portal-box" style="margin-bottom: 0;">
+                <h3 style="margin-top:0; color:var(--primary); font-size: 1.1em; margin-bottom: 15px;">Login to Existing Household</h3>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="text" id="existingDbInput" placeholder="Paste Invite Link or Dashboard ID" style="background: white;">
+                </div>
+                <button class="outline" onclick="processIdentityAndExecute('login')">Access Dashboard</button>
+            </div>
+
+        </div>
+
+        <!-- Directly opening from an Invite Link -->
+        <div id="joinOptionContainer" style="display:none; border-top: 1px solid var(--border); margin-top: 25px; padding-top: 30px;">
+            <p style="font-size:0.95em; margin-bottom:15px; color: var(--success); font-weight: 700;">✓ Secure Invite Link Verified</p>
+            <button class="primary-btn" id="btnJoinHousehold" onclick="processIdentityAndExecute('join')">Join Household</button>
+        </div>
     </div>
 </div>
 
@@ -145,6 +171,7 @@
         <div id="sidebar">
             <div>
                 <div style="padding: 10px 25px 25px 25px; font-weight: 800; font-size: 1.8em; color: white; letter-spacing: -0.5px;">Domus<span style="color:var(--secondary)">.</span></div>
+                <div id="sidebarHouseholdBadge" style="padding: 0 25px 25px 25px; font-size: 0.85em; color: #9FB3C8; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; text-transform: uppercase;"></div>
                 <div class="nav-item active" onclick="nav('dash')">📝 Expenses & Ledger</div>
                 <div class="nav-item" onclick="nav('analytics')">📊 Budgets & Insights</div>
                 <div class="nav-item" onclick="nav('settle')">🤝 Settle Balances</div>
@@ -327,7 +354,7 @@
                             <label>Join Existing (Paste Link or ID)</label>
                             <div style="display:flex; gap:10px;">
                                 <input type="text" id="joinHouseholdId" placeholder="Paste ID or Link">
-                                <button class="outline" style="width:auto;" onclick="joinHouseholdFromSettings()">Join</button>
+                                <button class="outline" style="width:auto;" onclick="processIdentityAndExecute('login')">Join</button>
                             </div>
                         </div>
                     </div>
@@ -407,17 +434,19 @@
   messagingSenderId: "104147538477",
   appId: "1:104147538477:web:6c2d325232f92f2a325ea4",
   measurementId: "G-1JKSP8DMKP"
-};
-    
+};    
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
     const storage = firebase.storage();
 
     // --- MULTI-TENANT STATE ---
+    let urlParams = new URLSearchParams(window.location.search);
+    let dashboardId = urlParams.get('db');
     let myName = localStorage.getItem('domusOS_Name');
-    let dashboardsData = []; // Array of all fetched households
-    let activeData = null;   // Synthesized active view data
-    let currentViewId = localStorage.getItem('domusOS_LastView') || 'all';
+    
+    let dashboardsData = []; 
+    let activeData = null;   
+    let currentViewId = dashboardId || localStorage.getItem('domusOS_LastView') || 'all';
     let unsubscribes = [];
 
     let chartPie = null, chartBar = null, comparativeChart = null;
@@ -427,22 +456,84 @@
     document.getElementById('settleDate').value = today;
     document.getElementById('globalMonthFilter').value = today.substring(0, 7);
 
-    function enterApp() {
-        const name = document.getElementById('userProfileName').value.trim();
-        if(!name) return alert("Please enter your name.");
-        localStorage.setItem('domusOS_Name', name);
-        myName = name;
-        bootDashboard();
-    }
-
-    // --- BOOTSTRAPPING ENGINE ---
+    // --- BOOTSTRAPPING ENGINE (BYPASSES LOGIN IF DB IS SAVED) ---
     window.addEventListener('DOMContentLoaded', async () => {
-        if (myName) {
+        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+        
+        if (dashboardId) {
+            if (!jHouseholds.includes(dashboardId)) {
+                jHouseholds.push(dashboardId);
+                localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+            }
+            localStorage.setItem('domusOS_LastView', dashboardId);
+            
+            document.getElementById('authActionsContainer').style.display = 'none';
+            document.getElementById('joinOptionContainer').style.display = 'block';
+        }
+
+        // Bypasses the landing page if user has previously joined ANY household
+        if (myName && (dashboardId || jHouseholds.length > 0)) {
             bootDashboard();
         } else {
+            if (myName) document.getElementById('userProfileName').value = myName;
             document.getElementById('viewLanding').style.display = 'flex';
         }
     });
+
+    function processIdentityAndExecute(strategy) {
+        const inputName = document.getElementById('userProfileName').value.trim();
+        if(!inputName) return alert("Please enter your name.");
+        localStorage.setItem('domusOS_Name', inputName);
+        myName = inputName;
+
+        if (strategy === 'create') {
+            const hName = document.getElementById('householdNameInput').value.trim();
+            if(!hName) return alert("Please enter a Household name.");
+            createNewDashboard(hName);
+        } else if (strategy === 'login') {
+            let inputId = document.getElementById('existingDbInput');
+            if(!inputId && document.getElementById('joinHouseholdId')) inputId = document.getElementById('joinHouseholdId');
+            let dbValue = inputId.value.trim();
+            
+            if(!dbValue) return alert("Please paste your Household ID or Invite Link.");
+            if(dbValue.includes('?db=')) dbValue = dbValue.split('?db=')[1].split('&')[0];
+            
+            let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+            if (!jHouseholds.includes(dbValue)) {
+                jHouseholds.push(dbValue);
+                localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+            }
+            localStorage.setItem('domusOS_LastView', dbValue);
+            window.location.href = `?db=${dbValue}`;
+        } else if (strategy === 'join') { 
+            bootDashboard(); 
+        }
+    }
+
+    async function createNewDashboard(householdName) {
+        const newId = db.collection('shared_dashboards').doc().id;
+        const secureAdminToken = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('domusOS_AdminKey_' + newId, secureAdminToken);
+        
+        await db.collection('shared_dashboards').doc(newId).set({
+            created_at: Date.now(),
+            householdName: householdName,
+            adminToken: secureAdminToken,
+            adminProfileName: myName,
+            members: [myName],
+            categories: ["Rent", "Groceries", "Utilities", "Dining Out", "Household"],
+            categoryBudgets: {},
+            expenses: [],
+            monthlyBudget: 0
+        });
+        
+        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
+        jHouseholds.push(newId);
+        localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
+        localStorage.setItem('domusOS_LastView', newId);
+        
+        window.location.href = `?db=${newId}`;
+    }
 
     function bootDashboard() {
         document.getElementById('viewLanding').className = 'view-section'; 
@@ -450,7 +541,6 @@
         document.getElementById('viewApp').style.display = 'flex';
         document.getElementById('headerName').innerText = `👤 ${myName}`;
 
-        // Clear existing listeners
         unsubscribes.forEach(unsub => unsub());
         unsubscribes = [];
         dashboardsData = [];
@@ -458,7 +548,6 @@
         let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
 
         if (jHouseholds.length === 0) {
-            // No households joined yet. We fake an empty activeData to show the UI
             activeData = { expenses: [], members: [myName], categories: [], categoryBudgets: {}, monthlyBudget: 0, householdName: 'Welcome to Domus' };
             renderApp();
             return;
@@ -468,19 +557,15 @@
             let unsub = db.collection('shared_dashboards').doc(id).onSnapshot(doc => {
                 if (doc.exists) {
                     let data = { id: doc.id, ...doc.data() };
-                    // Auto-add member if missing
                     if (!data.members.includes(myName)) {
                         data.members.push(myName);
                         db.collection('shared_dashboards').doc(id).set(data);
                     }
-                    
                     let idx = dashboardsData.findIndex(d => d.id === id);
                     if (idx > -1) dashboardsData[idx] = data;
                     else dashboardsData.push(data);
-                    
                     synthesizeActiveData();
                 } else {
-                    // Document deleted
                     jHouseholds = jHouseholds.filter(dbId => dbId !== id);
                     localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
                     dashboardsData = dashboardsData.filter(d => d.id !== id);
@@ -497,7 +582,6 @@
             renderApp(); return;
         }
 
-        // Validate currentViewId
         if (currentViewId !== 'all' && !dashboardsData.some(d => d.id === currentViewId)) {
             currentViewId = 'all';
             localStorage.setItem('domusOS_LastView', 'all');
@@ -565,29 +649,12 @@
         localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
         
         switchContext(newId);
-        bootDashboard(); // Reboot listeners
-    }
-
-    function joinHouseholdFromSettings() {
-        let inputId = document.getElementById('joinHouseholdId').value.trim();
-        if(!inputId) return alert("Paste link or ID");
-        if(inputId.includes('?db=')) inputId = inputId.split('?db=')[1].split('&')[0];
-        
-        let jHouseholds = JSON.parse(localStorage.getItem('domusOS_JoinedDBs') || '[]');
-        if (jHouseholds.includes(inputId)) return alert("You are already in this household.");
-        
-        jHouseholds.push(inputId);
-        localStorage.setItem('domusOS_JoinedDBs', JSON.stringify(jHouseholds));
-        document.getElementById('joinHouseholdId').value = '';
-        
-        switchContext(inputId);
-        bootDashboard(); // Reboot listeners
+        bootDashboard();
     }
 
     // --- SYNC HELPERS ---
     function syncSpecificDb(dbId, updatedDbObj) {
         if(!dbId) return;
-        // Strip the temporary dbId and dbName tags before saving
         let cleanObj = JSON.parse(JSON.stringify(updatedDbObj));
         cleanObj.expenses.forEach(ex => { delete ex.dbId; delete ex.dbName; });
         db.collection('shared_dashboards').doc(dbId).set(cleanObj).catch(e => console.error(e));
@@ -635,7 +702,6 @@
         if (type === 'custom') {
             ui.style.display = 'flex'; container.innerHTML = '';
             
-            // Depends on the selected household
             let targetMembers = activeData.members;
             if(currentViewId === 'all') {
                 const targetDbId = document.getElementById('targetHouseholdSelect').value;
@@ -679,7 +745,6 @@
         const recurringList = activeData.expenses.filter(e => e.isRecurring);
         let added = 0;
         
-        // Loop through all recurring in active view
         recurringList.forEach(ex => {
             const exists = activeData.expenses.some(e => e.desc === ex.desc && e.date.startsWith(currentMonth) && e.id !== ex.id && e.dbId === ex.dbId);
             if(!exists) {
@@ -896,7 +961,6 @@
         dashboardsData.forEach(d => { cSel.innerHTML += `<option value="${d.id}">${d.householdName}</option>`; });
         cSel.value = currentViewId;
 
-        // Conditional UI for 'all' vs 'specific'
         if (currentViewId === 'all') {
             document.getElementById('adminLinkContainer').style.display = 'none';
             document.getElementById('settingsContextBlock').style.display = 'none';
@@ -1085,7 +1149,7 @@
         if (chartPie) chartPie.destroy();
         if (Object.keys(catData).length > 0) { chartPie = new Chart(document.getElementById('categoryChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#334E68', '#F4A261', '#2a9d8f', '#e63946', '#f4a261', '#829AB1'], borderWidth:0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins:{legend:{position:'right', labels:{font:{family:'Inter', size:11}}}} } }); }
         
-        // Bar Chart (Net Balances)
+        // Bar Chart
         if (chartBar) chartBar.destroy();
         const labelsBar = activeData.members; 
         const netBalances = labelsBar.map(m => allTimeBalances[m].paid - allTimeBalances[m].liability);
